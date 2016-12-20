@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Bible</string>
+    <string name="grant_permission">This app needs to write to external storage to perform properly. Please consider granting the permission</string>
+    <string name="grant_permissions">Grant Permissions</string>
+    <string name="defaultReference">Gen 1:1</string>
+    <string name="defaultRibbonName">Start another Ribbon</string>
+    <string name="lastVisited">Last visited: </string>
+    <string name="neverVisited">never</string>
+    <string name="translationViewDefaultText">No translation associated</string>
+</resources>

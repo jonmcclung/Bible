@@ -1,0 +1,9 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="ribbonTextSize">24sp</dimen>
+    <dimen name="ribbonViewHeight">128dp</dimen>
+    <dimen name="ribbonSubViewTextSize">18sp</dimen>
+    <dimen name="chapterTextSize">20sp</dimen>
+</resources>

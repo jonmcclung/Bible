@@ -1,0 +1,13 @@
+    app/src/main/java
+     +-- com
+          |-- fasterxml
+          |    +-- jackson
+          |         |-- annotation
+          |         |    +-- many .java files
+          |         |-- core
+          |         |    +-- many .java files
+          |         +-- databind
+          |              +-- many .java files
+          +-- my_name
+               +-- my_app_name
+                    +-- my .java files
