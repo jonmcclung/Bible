@@ -1,12 +1,15 @@
 package com.lerenard.bible;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.Arrays;
 import java.util.List;
 
 /**
  * Created by mc on 18-Dec-16.
  */
-public class Reference {
+public class Reference implements Parcelable {
     public static final List<String> allBooks = Arrays.asList(
             "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges",
             "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles",
@@ -29,6 +32,27 @@ public class Reference {
             "John", "Acts", "Rom", "1 Cor", "2 Cor", "Gal", "Eph", "Phlp",
             "Col", "1 Th", "2 Th", "1 Tim", "2 Tim", "Titus", "Phlm",
             "Heb", "James", "1 Pet", "2 Pet", "1 Jn", "2 Jn", "3 Jn", "Jude", "Rev");
+    private static Reference defaultReference = new Reference("Genesis", 1, 1);
+
+    protected Reference(Parcel in) {
+        bookIndex = in.readInt();
+        chapter = in.readInt();
+        verse = in.readInt();
+        bookName = allBooks.get(bookIndex);
+        bookAbbreviation = abbreviations.get(bookIndex);
+    }
+
+    public static final Creator<Reference> CREATOR = new Creator<Reference>() {
+        @Override
+        public Reference createFromParcel(Parcel in) {
+            return new Reference(in);
+        }
+
+        @Override
+        public Reference[] newArray(int size) {
+            return new Reference[size];
+        }
+    };
 
     public String getBookName() {
         return bookName;
@@ -119,4 +143,19 @@ public class Reference {
     }
 
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeInt(bookIndex);
+        parcel.writeInt(chapter);
+        parcel.writeInt(verse);
+    }
+
+    public static Reference getDefault() {
+        return defaultReference;
+    }
 }

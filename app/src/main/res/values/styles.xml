@@ -10,7 +10,13 @@
     </style>
 
     <style name="chapterTextStyle" parent="@android:style/TextAppearance.Widget.TextView">
-        <item name="android:textSize">@dimen/chapterTextSize</item>
+        <item name="android:textSize">@dimen/verseTextSize</item>
+        <item name="android:textColor">@color/verseTextColor</item>
+    </style>
+
+    <style name="verseNumberStyle" parent="@android:style/TextAppearance.Widget.TextView">
+        <item name="android:textSize">@dimen/verseNumberSize</item>
+        <item name="android:textColor">@color/verseNumberColor</item>
     </style>
 
 </resources>

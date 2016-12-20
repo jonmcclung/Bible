@@ -1,11 +1,15 @@
 package com.lerenard.bible;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.drawable.Drawable;
+import android.icu.text.DateFormat;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -49,6 +53,7 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
     public static final int REQUEST_WRITE_STORAGE = 1;
     private static boolean justAsked = false;
     private static final String TAG = "HomeActivity_";
+    private static Context context;
 
     @Override
     public void onAdd(Ribbon ribbon, int index) {
@@ -67,7 +72,8 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
 
     @Override
     public void onClick(Ribbon ribbon, int position) {
-
+        Intent intent = new Intent(this, ReadingActivity.class).putExtra(ReadingActivity.RIBBON_KEY, ribbon);
+        startActivity(intent);
     }
 
     @Override
@@ -78,6 +84,10 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
     @Override
     public void onLongPress(Ribbon ribbon, int position) {
 
+    }
+
+    public static Context getContext() {
+        return context;
     }
 
     static class Person {
@@ -132,18 +142,23 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
         }
     }
 
+    private Translation loadTranslation(String path, String name) {
+        try {
+            InputStream file = getAssets().open(path);
+            Translation translation = Translation.fromJson(name, file);
+            Translation.add(translation);
+            file.close();
+            return translation;
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "resuming");
-
-        try {
-            InputStream file = getAssets().open("bibles/NIV/NIV.json");
-            Translation NIV = new Translation("NIV", file);
-            file.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        context = getApplicationContext();
 
         /*String s = "{\"name\": \"Jon\", \"age\": 21}";
 
@@ -244,11 +259,22 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        context = getApplicationContext();
         setContentView(R.layout.activity_home);
 
+        Translation NIV = loadTranslation("bibles/NIV/NIV.json", "NIV");
+        if (NIV != null) {
+            Translation.setDefault(NIV);
+        }
+        else {
+            Snackbar.make(
+                    findViewById(R.id.activity_home),
+                    String.format(getResources().getString(R.string.unable_to_load_bible), "NIV"),
+                    Snackbar.LENGTH_LONG).show();
+        }
+
+
         ArrayList<Ribbon> ribbons = new ArrayList<>();
-        ribbons.add(new Ribbon());
-        ribbons.add(new Ribbon());
         ribbons.add(new Ribbon());
 
         RibbonAdapter adapter = null;

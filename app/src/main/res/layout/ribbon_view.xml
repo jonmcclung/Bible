@@ -17,7 +17,7 @@
         android:layout_alignParentBottom="true">
 
         <TextView
-            android:id="@+id/lastVisitedText"
+            android:id="@+id/lastVisitedTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
@@ -29,8 +29,8 @@
             android:id="@+id/lastVisitedDateView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/lastVisitedText"
-            android:layout_toRightOf="@id/lastVisitedText"
+            android:layout_toEndOf="@id/lastVisitedTextView"
+            android:layout_toRightOf="@id/lastVisitedTextView"
             android:text="@string/neverVisited"
             android:layout_marginLeft="4dp"
             android:layout_marginStart="4dp"
@@ -52,6 +52,7 @@
     </RelativeLayout>
 
     <LinearLayout
+        android:id="@+id/ribbonViewMainView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_above="@id/ribbonViewSubView"
@@ -70,6 +71,7 @@
             android:textSize="@dimen/ribbonTextSize"/>
 
         <TextView
+            android:id="@+id/ribbonViewEmptyView"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"/>

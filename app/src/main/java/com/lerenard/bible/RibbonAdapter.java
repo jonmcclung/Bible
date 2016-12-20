@@ -6,6 +6,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -31,7 +33,8 @@ public class RibbonAdapter extends RecyclerAdapter<Ribbon, RibbonAdapter.RibbonV
             int selectedColor) throws NoSuchMethodException {
         super(items, listener, R.layout.ribbon_view,
               new Supplier<RibbonViewHolder>(
-                      RibbonViewHolder.class.getConstructor(RibbonAdapter.class, View.class, RibbonAdapter.class)),
+                      RibbonViewHolder.class.getConstructor(RibbonAdapter.class, View.class,
+                                                            RibbonAdapter.class)),
               unselectedColor, selectedColor);
     }
 
@@ -46,7 +49,8 @@ public class RibbonAdapter extends RecyclerAdapter<Ribbon, RibbonAdapter.RibbonV
 
     class RibbonViewHolder extends RecyclerViewHolder<Ribbon> {
 
-        private TextView nameView, referenceView;
+        private TextView nameView, referenceView, lastVisitedDateView,
+                translationView;
 
         public RibbonViewHolder(
                 View itemView,
@@ -55,6 +59,8 @@ public class RibbonAdapter extends RecyclerAdapter<Ribbon, RibbonAdapter.RibbonV
 
             nameView = (TextView) itemView.findViewById(R.id.nameView);
             referenceView = (TextView) itemView.findViewById(R.id.referenceView);
+            lastVisitedDateView = (TextView) itemView.findViewById(R.id.lastVisitedDateView);
+            translationView = (TextView) itemView.findViewById(R.id.translationView);
         }
 
         @Override
@@ -67,8 +73,9 @@ public class RibbonAdapter extends RecyclerAdapter<Ribbon, RibbonAdapter.RibbonV
                 referenceView.setText(ribbon.getReference().toString());
             }
             if (ribbon.getTranslation() != null) {
-
+                translationView.setText(ribbon.getTranslation().getName());
             }
+            lastVisitedDateView.setText(ribbon.getLastVisitedText());
         }
     }
 }

@@ -7,4 +7,8 @@
     <string name="lastVisited">Last visited: </string>
     <string name="neverVisited">never</string>
     <string name="translationViewDefaultText">No translation associated</string>
+    <string name="unable_to_load_bible">Unable to load %s...</string>
+    <string name="verse_followed_by_number">%1$s %2$d</string>
+    <string name="spacing_between_number_and_verse">" "</string>
+    <string name="spacing_between_verse_and_number">" "</string>
 </resources>

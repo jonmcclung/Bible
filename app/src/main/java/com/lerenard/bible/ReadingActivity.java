@@ -1,32 +1,39 @@
 package com.lerenard.bible;
 
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.text.style.StyleSpan;
 import android.text.style.SubscriptSpan;
+import android.text.style.TextAppearanceSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 public class ReadingActivity extends AppCompatActivity {
-
-    public static final String
-            TRANSLATION_KEY = "READING_ACTIVITY_TRANSLATION_KEY",
-            REFERENCE_KEY = "READING_ACTIVITY_REFERENCE_KEY";
+    public static final String RIBBON_KEY = "RIBBON_KEY";
+    private static final String TAG = "ReadingActivity_";
     private LinearLayout chapterText;
     private LayoutInflater inflater;
 
+    private LinearLayout getRow() {
+        return (LinearLayout) inflater.inflate(R.layout.verse_row, chapterText, false);
+    }
+/*
     class VerseView {
 
-        //        private ArrayList<TextView> views = new ArrayList<>(3);
-        private int endOffset;
         private int number;
+
+        public VerseView(TextView textView, int number, String rawText) {
+            this.number = number;
+            addSubscript(textView);
+            textView.append(rawText);
+        }
 
         public VerseView(LinearLayout currentRow, int number, String rawText) {
             this.number = number;
@@ -34,8 +41,7 @@ public class ReadingActivity extends AppCompatActivity {
 
             // start represents the part that continues on the last line we left off at.
             TextView middle, end,
-                    start = (TextView) inflater
-                            .inflate(R.layout.verse_text_view, currentRow, false);
+                    start = getViewInRow(currentRow);
             currentRow.addView(start);
 
             start.setMaxLines(1);
@@ -56,11 +62,11 @@ public class ReadingActivity extends AppCompatActivity {
             else {
                 start.setText(text, 0, lastSpaceIndex);
 //                views.add(start);
-                middle = (TextView) inflater.inflate(R.layout.verse_text_view, currentRow, false);
+                middle = getViewInRow(currentRow);
                 middle.setText(text, lastSpaceIndex, text.length - lastSpaceIndex);
             }
 
-            currentRow = (LinearLayout) inflater.inflate(R.layout.verse_row, chapterText, false);
+            currentRow = getRow();
             chapterText.addView(currentRow);
             currentRow.addView(middle);
 
@@ -70,26 +76,20 @@ public class ReadingActivity extends AppCompatActivity {
                 middle.setText(text, lastSpaceIndex, endOfMiddle - lastSpaceIndex);
 //                views.add(middle);
 
-                currentRow =
-                        (LinearLayout) inflater.inflate(R.layout.verse_row, chapterText, false);
+                currentRow = getRow();
                 chapterText.addView(currentRow);
-                end = (TextView) inflater.inflate(R.layout.verse_text_view, currentRow, false);
+                end = getViewInRow(currentRow);
                 currentRow.addView(end);
                 end.setText(text, endOfMiddle, text.length - endOfMiddle);
 //                views.add(end);
             }
 
-        }
+        }*/
 
-        private String addSubscript(TextView view) {
-
-            SpannableStringBuilder builder =
-                    new SpannableStringBuilder(String.format(Locale.getDefault(), "%d", number));
-            builder.setSpan(
-                    new SubscriptSpan(), 0, builder.length() - 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            builder.append(view.getText());
-            return builder.toString();
-        }
+      /*  private TextView getViewInRow(LinearLayout currentRow) {
+            return (TextView) inflater.inflate(
+                    R.layout.verse_text_view, currentRow, false);
+        }*/
 /*
 
         public ArrayList<TextView> getViews() {
@@ -119,16 +119,47 @@ public class ReadingActivity extends AppCompatActivity {
         }
 */
 
+//    }
+
+    private void addSubscript(TextView view, int number) {
+        SpannableStringBuilder builder = new SpannableStringBuilder(
+                String.format(
+                        Locale.getDefault(),
+                        "%d",
+                        number));
+        builder.setSpan(
+                new TextAppearanceSpan(getApplicationContext(), R.style.verseNumberStyle),
+                0,
+                builder.length(),
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        view.append(builder);
     }
 
     private void initializeText(Chapter chapter) {
         ArrayList<Verse> verses = chapter.getVerses();
+        chapterText.removeAllViews();
+        final LinearLayout currentRow = getRow();
+        chapterText.addView(currentRow);
+        TextView textView = (TextView) inflater.inflate(
+                R.layout.verse_text_view, currentRow, false);
+        currentRow.addView(textView);
+
         for (int i = 0; i < verses.size(); ++i) {
+            Verse verse = verses.get(i);
+            addSubscript(textView, i + 1);
+            textView.append(getString(R.string.spacing_between_number_and_verse));
+            textView.append(verse.getText());
+            textView.append(getString(R.string.spacing_between_verse_and_number));
+        }
+
+
+        /*for (int i = 0; i < verses.size(); ++i) {
             VerseView verseView = new VerseView(
                     (LinearLayout) chapterText.getChildAt(chapterText.getChildCount() - 1), i + 1,
                     verses.get(i).getText());
 
-        }
+        }*/
+
     }
 
     @Override
@@ -143,9 +174,9 @@ public class ReadingActivity extends AppCompatActivity {
 
         Bundle extras = getIntent().getExtras();
 
-        Translation translation = extras.getParcelable(TRANSLATION_KEY);
-        Reference reference = extras.getParcelable(REFERENCE_KEY);
-
+        Ribbon ribbon = extras.getParcelable(RIBBON_KEY);
+        Translation translation = ribbon.getTranslation();
+        Reference reference = ribbon.getReference();
 
         Chapter chapter =
                 translation.getBook(reference.getBookIndex()).getChapter(reference.getChapter());
