@@ -5,6 +5,7 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.text.format.DateFormat;
+import android.util.Log;
 
 import java.sql.Date;
 
@@ -13,6 +14,10 @@ import java.sql.Date;
  */
 public class Ribbon implements Parcelable {
     private static final String defaultName = HomeActivity.getContext().getString(R.string.defaultRibbonName);
+
+
+
+    private static final String TAG = "Ribbon_";
     private @NonNull
     Translation translation;
     private Reference reference;
@@ -87,6 +92,11 @@ public class Ribbon implements Parcelable {
         lastVisitedText = HomeActivity.getContext().getString(R.string.neverVisited);
     }
 
+    @Override
+    public String toString() {
+        return "<Ribbon(name: " + name + ", translation: " + translation.toString() + ", reference: " + reference.toString() + ")>";
+    }
+
     public Ribbon(@NonNull Translation translation, Reference reference, String name) {
         this.translation = translation;
         this.reference = reference;
@@ -105,5 +115,21 @@ public class Ribbon implements Parcelable {
         parcel.writeParcelable(reference, 0);
         parcel.writeString(name);
         parcel.writeLong(lastVisited.getTime());
+    }
+
+    public Book getBook() {
+        return translation.getBook(reference.getBookIndex());
+    }
+
+    public Chapter getChapter() {
+        int bookIndex = reference.getBookIndex();
+        Log.d(TAG, "bookIndex: " + bookIndex);
+        Book book = translation.getBook(bookIndex);
+        Log.d(TAG, "book: " + book);
+        int chapterIndex = reference.getChapter();
+        Log.d(TAG, "chapterIndex: " + chapterIndex);
+        Chapter chapter = book.getChapter(chapterIndex);
+        Log.d(TAG, "chapter: " + chapter);
+        return chapter;
     }
 }

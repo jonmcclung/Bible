@@ -7,4 +7,7 @@
     <dimen name="ribbonSubViewTextSize">18sp</dimen>
     <dimen name="verseTextSize">20sp</dimen>
     <dimen name="verseNumberSize">12sp</dimen>
+    <dimen name="chapterNumberSize">64sp</dimen>
+    <dimen name="activity_reading_padding">16dp</dimen>
+    <dimen name="activity_reading_end_padding">128dp</dimen>
 </resources>

@@ -52,7 +52,7 @@ public class Book implements Parcelable {
      * 1-based, or null if out of bounds.
      */
     public Chapter getChapter(int index) {
-        if (index > 0 && index < chapters.size()) {
+        if (index > 0 && index <= chapters.size()) {
             return chapters.get(index - 1);
         }
         else {
@@ -64,7 +64,7 @@ public class Book implements Parcelable {
         this.chapters = chapters;
     }
 
-    public int getCount() {
+    public int getChapterCount() {
         return chapters.size();
     }
 

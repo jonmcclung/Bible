@@ -22,7 +22,7 @@ import co.paulburke.android.itemtouchhelperdemo.helper.OnStartDragListener;
  * Created by mc on 18-Dec-16.
  */
 
-public class RibbonAdapter extends RecyclerAdapter<Ribbon, RibbonAdapter.RibbonViewHolder> {
+public class RibbonAdapter extends RecyclerAdapter<Ribbon, RibbonViewHolder> {
 
     private static String TAG = "CountRecyclerViewAdapter";
 
@@ -32,9 +32,10 @@ public class RibbonAdapter extends RecyclerAdapter<Ribbon, RibbonAdapter.RibbonV
             DataSetListener<Ribbon> listener, int unselectedColor,
             int selectedColor) throws NoSuchMethodException {
         super(items, listener, R.layout.ribbon_view,
-              new Supplier<RibbonViewHolder>(
-                      RibbonViewHolder.class.getConstructor(RibbonAdapter.class, View.class,
-                                                            RibbonAdapter.class)),
+              new Supplier<>(
+                      RibbonViewHolder.class.getConstructor(
+                              View.class,
+                              RibbonAdapter.class)),
               unselectedColor, selectedColor);
     }
 
@@ -43,39 +44,6 @@ public class RibbonAdapter extends RecyclerAdapter<Ribbon, RibbonAdapter.RibbonV
         View view = LayoutInflater
                 .from(parent.getContext())
                 .inflate(layout, parent, false);
-        return supplier.get(RibbonAdapter.this, view, this);
-    }
-
-
-    class RibbonViewHolder extends RecyclerViewHolder<Ribbon> {
-
-        private TextView nameView, referenceView, lastVisitedDateView,
-                translationView;
-
-        public RibbonViewHolder(
-                View itemView,
-                RibbonAdapter adapter) {
-            super(itemView, adapter);
-
-            nameView = (TextView) itemView.findViewById(R.id.nameView);
-            referenceView = (TextView) itemView.findViewById(R.id.referenceView);
-            lastVisitedDateView = (TextView) itemView.findViewById(R.id.lastVisitedDateView);
-            translationView = (TextView) itemView.findViewById(R.id.translationView);
-        }
-
-        @Override
-        public void setItem(Ribbon ribbon) {
-            super.setItem(ribbon);
-            if (ribbon.getName() != null) {
-                nameView.setText(ribbon.getName());
-            }
-            if (ribbon.getReference() != null) {
-                referenceView.setText(ribbon.getReference().toString());
-            }
-            if (ribbon.getTranslation() != null) {
-                translationView.setText(ribbon.getTranslation().getName());
-            }
-            lastVisitedDateView.setText(ribbon.getLastVisitedText());
-        }
+        return supplier.get(view, this);
     }
 }

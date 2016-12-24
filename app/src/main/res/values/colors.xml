@@ -8,5 +8,6 @@
     <color name="defaultItemColor">#5de1c183</color>
     <color name="ripple">@color/highlightColor</color>
     <color name="verseTextColor">@color/colorPrimaryDark</color>
-    <color name="verseNumberColor">#bc564421</color>
+    <color name="verseNumberColor">@color/verseTextColor</color>
+    <color name="chapterNumberColor">@color/colorPrimary</color>
 </resources>

@@ -276,6 +276,7 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
 
         ArrayList<Ribbon> ribbons = new ArrayList<>();
         ribbons.add(new Ribbon());
+        ribbons.add(new Ribbon(NIV, new Reference("1 John", 1, 1), "something else"));
 
         RibbonAdapter adapter = null;
 

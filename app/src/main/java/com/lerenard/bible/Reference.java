@@ -32,7 +32,33 @@ public class Reference implements Parcelable {
             "John", "Acts", "Rom", "1 Cor", "2 Cor", "Gal", "Eph", "Phlp",
             "Col", "1 Th", "2 Th", "1 Tim", "2 Tim", "Titus", "Phlm",
             "Heb", "James", "1 Pet", "2 Pet", "1 Jn", "2 Jn", "3 Jn", "Jude", "Rev");
+
     private static Reference defaultReference = new Reference("Genesis", 1, 1);
+
+    private static final int[] cumulativeChapterCount = {
+            50, 90, 117, 153, 187, 211, 232, 236, 267, 291, 313, 338, 367, 403, 413, 426, 436, 478,
+            628, 659, 671, 679, 745, 797, 802, 850, 862, 876, 879, 888, 889, 893, 900, 903, 906,
+            909, 911, 925, 929, 957, 973, 997, 1018, 1046, 1062, 1078, 1091, 1097, 1103, 1107, 1111,
+            1116, 1119, 1125, 1129, 1132, 1133, 1146, 1151, 1156, 1159, 1164, 1165, 1166, 1167,
+            1189};
+
+    public static Reference fromPosition(int position) {
+        int index = Arrays.binarySearch(cumulativeChapterCount, position);
+        if (index < 0) {  // the exact chapter count was not found
+            /* converting to insertion point: the first index that held a value greater than
+            position, also the index of the book it belongs in*/
+            index = -(index + 1);
+            if (index == cumulativeChapterCount.length) {
+                return null;  // invalid position
+            }
+        }
+        if (index == 0) {
+            return new Reference(0, position, 1);
+        }
+        else {
+            return new Reference(index, position - cumulativeChapterCount[index - 1], 1);
+        }
+    }
 
     protected Reference(Parcel in) {
         bookIndex = in.readInt();
@@ -53,6 +79,10 @@ public class Reference implements Parcelable {
             return new Reference[size];
         }
     };
+
+    public Reference(Reference reference) {
+        this(reference.bookIndex, reference.chapter, reference.verse);
+    }
 
     public String getBookName() {
         return bookName;
@@ -97,7 +127,8 @@ public class Reference implements Parcelable {
         if (bookIndex == -1) {
             bookIndex = abbreviations.indexOf(bookName);
             if (bookIndex == -1) {
-                throw new IllegalArgumentException("I can't find a bookName with the name " + bookName);
+                throw new IllegalArgumentException(
+                        "I can't find a bookName with the name " + bookName);
             }
             else {
                 bookAbbreviation = bookName;
@@ -116,7 +147,8 @@ public class Reference implements Parcelable {
         if (!bookName.equals(this.bookName)) {
             if (!bookName.equals(this.bookAbbreviation)) {
                 throw new IllegalArgumentException(
-                        "The bookName " + bookName + " does not match the given bookIndex of " + bookIndex +
+                        "The bookName " + bookName + " does not match the given bookIndex of " +
+                        bookIndex +
                         ". Expected value was one of " + this.bookName + " and " +
                         abbreviations.get(bookIndex));
             }
@@ -157,5 +189,20 @@ public class Reference implements Parcelable {
 
     public static Reference getDefault() {
         return defaultReference;
+    }
+
+    public static int getTotalChapterCount() {
+        return cumulativeChapterCount[cumulativeChapterCount.length - 1];
+    }
+
+    /**
+     * @return the index of this reference's chapter in an ordered list of all chapters from
+     * Genesis 1 to the last chapter of Revelation.
+     */
+    public int position() {
+        if (bookIndex == 0) {
+            return chapter;
+        }
+        return cumulativeChapterCount[bookIndex - 1] + chapter;
     }
 }
