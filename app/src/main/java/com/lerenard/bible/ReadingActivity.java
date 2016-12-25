@@ -24,8 +24,6 @@ import java.util.TimerTask;
 public class ReadingActivity extends AppCompatActivity {
     public static final String RIBBON_KEY = "RIBBON_KEY";
     private static final String TAG = "ReadingActivity_";
-    private Reference reference;
-    private Translation translation;
     private TextView bookNameView;
     private TextView chapterNameView;
     private TextView translationNameView;
@@ -33,20 +31,15 @@ public class ReadingActivity extends AppCompatActivity {
     private ViewPager pager;
 
     private void updateInfoToolbar(Ribbon ribbon) {
-        bookNameView.setText(ribbon.getBook().getName());
-        chapterNameView.setText(
-                String.format(Locale.getDefault(), "%d", ribbon.getReference().getChapter()));
-        translationNameView.setText(ribbon.getTranslation().getName());
+
     }
 
     private void updateInfoToolbar() {
-        ChapterFragment fragment = adapter.getFragment(pager.getCurrentItem());
-        if (fragment != null) {
-            updateInfoToolbar(fragment.getRibbon());
-        }
-        else {
-            Log.d(TAG, "unable to update toolbar");
-        }
+        Reference reference = Reference.fromPosition(pager.getCurrentItem());
+        
+        bookNameView.setText(reference.getBookName());
+        chapterNameView.setText(
+                String.format(Locale.getDefault(), "%d", reference.getChapter()));
     }
 
     @Override
@@ -62,6 +55,7 @@ public class ReadingActivity extends AppCompatActivity {
         bookNameView = (TextView) findViewById(R.id.book_name_view);
         chapterNameView = (TextView) findViewById(R.id.chapter_name_view);
         translationNameView = (TextView) findViewById(R.id.translation_name_view);
+        translationNameView.setText(ribbon.getTranslation().getName());
 
         pager = (ViewPager) findViewById(R.id.chapter_pager);
         adapter = new ChapterPagerAdapter(ribbon, getSupportFragmentManager());
@@ -74,6 +68,7 @@ public class ReadingActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
+                Log.d(TAG, "now at " + position + " (" + Reference.fromPosition(position) + ")");
                 updateInfoToolbar();
             }
 
@@ -94,7 +89,7 @@ public class ReadingActivity extends AppCompatActivity {
                 }*/
             }
         });
-        updateInfoToolbar(ribbon);
+        updateInfoToolbar();
         /*pager.getViewTreeObserver().addOnGlobalLayoutListener(
                 new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
