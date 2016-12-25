@@ -24,18 +24,16 @@ public class ChapterFragment extends Fragment {
     private static final String TAG = "ChapterFragment_";
     private Ribbon ribbon;
 
+    public Ribbon getRibbon() {
+        return ribbon;
+    }
+
     @Override
     public void setArguments(Bundle args) {
         super.setArguments(args);
         if (args != null) {
             ribbon = args.getParcelable(ReadingActivity.RIBBON_KEY);
-            Log.d(TAG, "successfully received ribbon");
-            if (ribbon == null) {
-                Log.d(TAG, "it is null");
-            }
-            else {
-                Log.d(TAG, "it is " + ribbon.toString());
-            }
+            Log.d(TAG, "successfully received ribbon: " + ribbon + " this: " + this);
         }
     }
 
@@ -78,16 +76,16 @@ public class ChapterFragment extends Fragment {
     public View onCreateView(
             LayoutInflater inflater, @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState) {
-        if (ribbon == null) {
-            if (savedInstanceState == null) {
-                Log.e(TAG, "can't retrieve ribbon...");
-                System.exit(1);
-            }
+        if (savedInstanceState != null) {
             ribbon = savedInstanceState.getParcelable(ReadingActivity.RIBBON_KEY);
         }
+        Log.d(TAG, "ribbon is " + ribbon + " this: " + this);
         View root = inflater.inflate(R.layout.fragment_reading, container, false);
-        ((TextView) root.findViewById(R.id.chapterText))
-                .setText(getChapterText(ribbon.getChapter()));
+        root.setTag(ribbon.getReference().getPosition());
+        Log.d(TAG, "I set the view's tag to " + ribbon.getReference().getPosition() + "! " + root);
+        TextView text = ((TextView) root.findViewById(R.id.chapterText));
+        text.setText(getChapterText(ribbon.getChapter()));
+
         return root;
     }
 }

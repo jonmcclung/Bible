@@ -10,4 +10,6 @@
     <dimen name="chapterNumberSize">64sp</dimen>
     <dimen name="activity_reading_padding">16dp</dimen>
     <dimen name="activity_reading_end_padding">128dp</dimen>
+    <dimen name="activity_reading_reference_info_view_textSize">24sp</dimen>
+    <dimen name="activity_reading_toolbar_height">64dp</dimen>
 </resources>

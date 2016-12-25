@@ -2,10 +2,10 @@
 <resources>
     <color name="colorPrimary">#845b0d</color>
     <color name="colorPrimaryDark">#533908</color>
-    <color name="colorAccent">#fff240</color>
-    <color name="background">#3b845b0d</color>
-    <color name="highlightColor">#5dffd687</color>
-    <color name="defaultItemColor">#5de1c183</color>
+    <color name="colorAccent">#40ff40</color>
+    <color name="background">#e7d6b6</color>
+    <color name="highlightColor">#ffd687</color>
+    <color name="defaultItemColor">#f4d9a5</color>
     <color name="ripple">@color/highlightColor</color>
     <color name="verseTextColor">@color/colorPrimaryDark</color>
     <color name="verseNumberColor">@color/verseTextColor</color>

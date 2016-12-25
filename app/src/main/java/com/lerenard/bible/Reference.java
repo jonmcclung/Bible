@@ -41,23 +41,23 @@ public class Reference implements Parcelable {
             909, 911, 925, 929, 957, 973, 997, 1018, 1046, 1062, 1078, 1091, 1097, 1103, 1107, 1111,
             1116, 1119, 1125, 1129, 1132, 1133, 1146, 1151, 1156, 1159, 1164, 1165, 1166, 1167,
             1189};
+    private int position;
 
     public static Reference fromPosition(int position) {
         int index = Arrays.binarySearch(cumulativeChapterCount, position);
-        if (index < 0) {  // the exact chapter count was not found
+        if (index >= 0) {  // it is the first chapter of the next book, so increment index
+            ++index;
+        }
+        else {  // the exact chapter count was not found
             /* converting to insertion point: the first index that held a value greater than
-            position, also the index of the book it belongs in*/
+            calculatePosition, also the index of the book it belongs in*/
             index = -(index + 1);
             if (index == cumulativeChapterCount.length) {
-                return null;  // invalid position
+                return null;  // invalid calculatePosition
             }
         }
-        if (index == 0) {
-            return new Reference(0, position, 1);
-        }
-        else {
-            return new Reference(index, position - cumulativeChapterCount[index - 1], 1);
-        }
+        int chapterIndex = position + 1 - (index == 0 ? 0 : cumulativeChapterCount[index - 1]);
+        return new Reference(index, chapterIndex, 1);
     }
 
     protected Reference(Parcel in) {
@@ -66,6 +66,7 @@ public class Reference implements Parcelable {
         verse = in.readInt();
         bookName = allBooks.get(bookIndex);
         bookAbbreviation = abbreviations.get(bookIndex);
+        updatePosition();
     }
 
     public static final Creator<Reference> CREATOR = new Creator<Reference>() {
@@ -88,16 +89,13 @@ public class Reference implements Parcelable {
         return bookName;
     }
 
-    public void setBookName(String bookName) {
-        this.bookName = bookName;
-    }
-
     public int getChapter() {
         return chapter;
     }
 
     public void setChapter(int chapter) {
         this.chapter = chapter;
+        updatePosition();
     }
 
     public int getVerse() {
@@ -114,6 +112,7 @@ public class Reference implements Parcelable {
 
     public void setBookIndex(int bookIndex) {
         this.bookIndex = bookIndex;
+        updatePosition();
     }
 
     private String bookName, bookAbbreviation;
@@ -160,13 +159,18 @@ public class Reference implements Parcelable {
         this.bookIndex = bookIndex;
         this.bookName = allBooks.get(bookIndex);
         this.bookAbbreviation = abbreviations.get(bookIndex);
+        updatePosition();
     }
 
     public Reference() {}
 
+    public String getUIString() {
+        return bookName + " " + String.valueOf(chapter) + ":" + String.valueOf(verse);
+    }
+
     @Override
     public String toString() {
-        return bookName + " " + String.valueOf(chapter) + ":" + String.valueOf(verse);
+         return getUIString() + " (position: " + position + ")";
     }
 
     public static Reference parseString(String reference) {
@@ -199,10 +203,16 @@ public class Reference implements Parcelable {
      * @return the index of this reference's chapter in an ordered list of all chapters from
      * Genesis 1 to the last chapter of Revelation.
      */
-    public int position() {
+    private void updatePosition() {
         if (bookIndex == 0) {
-            return chapter;
+            position = chapter - 1;
         }
-        return cumulativeChapterCount[bookIndex - 1] + chapter;
+        else {
+            position = cumulativeChapterCount[bookIndex - 1] + chapter - 1;
+        }
+    }
+
+    public int getPosition() {
+        return position;
     }
 }

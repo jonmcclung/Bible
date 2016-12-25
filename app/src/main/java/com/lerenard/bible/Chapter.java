@@ -16,7 +16,7 @@ public class Chapter implements Parcelable {
 
     @Override
     public String toString() {
-        return "<Chapter(verses: " + verses.toString() + ")>";
+        return "<Chapter(verses: " + getCount() + ")>";
     }
 
     public Chapter(ArrayList<Verse> verses) {

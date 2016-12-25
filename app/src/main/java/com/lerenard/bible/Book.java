@@ -32,7 +32,7 @@ public class Book implements Parcelable {
 
     @Override
     public String toString() {
-        return "<Book(name: " + name + " chapters: " + chapters.toString() + ")>";
+        return "<Book(name: " + name + " chapters: " + chapters.size() + ")>";
     }
 
     public Book(String name, ArrayList<Chapter> chapters) {
