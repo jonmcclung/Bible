@@ -23,7 +23,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class ReadingActivity extends AppCompatActivity {
-    public static final String RIBBON_KEY = "RIBBON_KEY";
+    public static final String RIBBON_KEY = "RIBBON_KEY", CURRENT_POSITION_KEY = "CURRENT_POSITION_KEY";
     private static final String TAG = "ReadingActivity_";
     private TextView bookNameView;
     private TextView chapterNameView;
@@ -31,6 +31,13 @@ public class ReadingActivity extends AppCompatActivity {
     private ChapterPagerAdapter adapter;
     private ViewPager pager;
     private ScrollView scrollView;
+    int currentPosition = -1;
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(CURRENT_POSITION_KEY, pager.getCurrentItem());
+    }
 
     private void updateInfoToolbar(Ribbon ribbon) {
 
@@ -56,52 +63,50 @@ public class ReadingActivity extends AppCompatActivity {
         scrollView = (ScrollView) findViewById(R.id.scrollView);
 
 
-            Bundle extras = getIntent().getExtras();
-            Ribbon ribbon = extras.getParcelable(RIBBON_KEY);
-            assert ribbon != null : Log.e(TAG, "somehow ribbon is null.");
+        final Bundle extras = getIntent().getExtras();
+        Ribbon ribbon = extras.getParcelable(RIBBON_KEY);
+        assert ribbon != null : Log.e(TAG, "somehow ribbon is null.");
 
 //        LinearLayout toolBar = (LinearLayout) findViewById(R.id.activity_reading_toolbar);
-            translationNameView.setText(ribbon.getTranslation().getName());
+        translationNameView.setText(ribbon.getTranslation().getName());
 
-            pager = (ViewPager) findViewById(R.id.chapter_pager);
-            adapter = new ChapterPagerAdapter(ribbon, getSupportFragmentManager());
-            pager.setAdapter(adapter);
-            pager.setCurrentItem(ribbon.getReference().getPosition());
-            Log.d(TAG, "set current item to " + ribbon.getReference());
-            pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-                @Override
-                public void onPageScrolled(
-                        int position, float positionOffset, int positionOffsetPixels) {}
+        pager = (ViewPager) findViewById(R.id.chapter_pager);
+        adapter = new ChapterPagerAdapter(ribbon, getSupportFragmentManager());
+        pager.setAdapter(adapter);
+        if (savedInstanceState == null) {
+            currentPosition = ribbon.getReference().getPosition();
+        }
+        else {
+            currentPosition = savedInstanceState.getInt(CURRENT_POSITION_KEY);
+        }
+        pager.setCurrentItem(currentPosition);
+        Log.d(TAG, "set current item to " + ribbon.getReference());
+        pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
 
-                @Override
-                public void onPageSelected(int position) {
-                    Log.d(
-                            TAG,
-                            "now at " + position + " (" + Reference.fromPosition(position) + ")");
-                    updateInfoToolbar();
+            @Override
+            public void onPageScrolled(
+                    int position, float positionOffset, int positionOffsetPixels) {}
+
+            @Override
+            public void onPageSelected(int position) {
+                Log.d(
+                        TAG,
+                        "now at " + position + " (" + Reference.fromPosition(position) + ")");
+                updateInfoToolbar();
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+                // TODO
+                if (state == ViewPager.SCROLL_STATE_IDLE && currentPosition != pager.getCurrentItem()) {
+                    scrollView.smoothScrollTo(0, 0);
+                    currentPosition = pager.getCurrentItem();
+                    Log.d(TAG, "current item is now " + currentPosition);
                 }
-
-                @Override
-                public void onPageScrollStateChanged(int state) {
-
-                    // TODO
-                    if (state == ViewPager.SCROLL_STATE_IDLE) {
-                        final ScrollView view =
-                                (ScrollView) pager.findViewWithTag(pager.getCurrentItem());
-                        final LinearLayout linearLayout = (LinearLayout) view.getChildAt(0);
-                        linearLayout.setFocusable(false);
-                        Log.d(TAG, "scroll idle, about to scroll " + linearLayout);
-                        view.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                Log.d(TAG, "got to post, scroll time!");
-                                scrollView.smoothScrollTo(0, 0);
-                            }
-                        });
-                    }
-                }
-            });
-            updateInfoToolbar();
+            }
+        });
+        updateInfoToolbar();
         /*pager.getViewTreeObserver().addOnGlobalLayoutListener(
                 new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override

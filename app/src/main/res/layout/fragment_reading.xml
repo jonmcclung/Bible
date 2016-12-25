@@ -1,36 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:descendantFocusability="blocksDescendants"
+    android:orientation="vertical"
+    android:paddingEnd="@dimen/activity_reading_padding"
+    android:paddingLeft="@dimen/activity_reading_padding"
+    android:paddingRight="@dimen/activity_reading_padding"
+    android:paddingStart="@dimen/activity_reading_padding">
 
-    <LinearLayout
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/activity_reading_toolbar_height"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/activity_reading_padding"/>
+
+    <TextView
+        android:id="@+id/chapterText"
+        style="@style/chapterTextStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:descendantFocusability="blocksDescendants"
-        android:paddingEnd="@dimen/activity_reading_padding"
-        android:paddingLeft="@dimen/activity_reading_padding"
-        android:paddingRight="@dimen/activity_reading_padding"
-        android:paddingStart="@dimen/activity_reading_padding">
+        android:orientation="vertical"/>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/activity_reading_toolbar_height"/>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/activity_reading_padding"/>
-
-            <TextView
-                android:id="@+id/chapterText"
-                style="@style/chapterTextStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"/>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/activity_reading_end_padding"/>
-    </LinearLayout>
-</ScrollView>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/activity_reading_end_padding"/>
+</LinearLayout>
