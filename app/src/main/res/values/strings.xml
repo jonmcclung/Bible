@@ -11,4 +11,5 @@
     <string name="verse_followed_by_number">%1$s %2$d</string>
     <string name="spacing_between_number_and_verse">" "</string>
     <string name="spacing_between_verse_and_number">" "</string>
+    <string name="submit_reference_selector">Go</string>
 </resources>

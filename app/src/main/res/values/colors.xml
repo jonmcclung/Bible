@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#845b0d</color>
-    <color name="colorPrimaryDark">#533908</color>
+    <color name="colorPrimary">#807663</color>
+    <color name="colorPrimaryDarker">#686051</color>
+    <color name="colorPrimaryDark">#4d473c</color>
     <color name="colorAccent">#40ff40</color>
-    <color name="background">#e7d6b6</color>
-    <color name="highlightColor">#ffd687</color>
-    <color name="defaultItemColor">#f4d9a5</color>
+    <color name="background">#e2e4d8</color>
+    <color name="highlightColor">#5da663</color>
+    <color name="defaultItemColor">@color/backgroundDark</color>
     <color name="ripple">@color/highlightColor</color>
     <color name="verseTextColor">@color/colorPrimaryDark</color>
-    <color name="verseNumberColor">@color/verseTextColor</color>
+    <color name="verseNumberColor">#34a73d</color>
     <color name="chapterNumberColor">@color/colorPrimary</color>
+    <color name="backgroundDark">@color/colorPrimary</color>
+    <color name="ribbonViewTextColor">@android:color/white</color>
+    <color name="referenceSelectorTextColor">@android:color/white</color>
 </resources>

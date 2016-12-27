@@ -18,28 +18,23 @@
 
         <TextView
             android:id="@+id/lastVisitedTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/ribbonSubViewText"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:text="@string/lastVisited"
-            android:textSize="@dimen/ribbonSubViewTextSize"/>
+            android:text="@string/lastVisited"/>
 
         <TextView
             android:id="@+id/lastVisitedDateView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/ribbonSubViewText"
             android:layout_toEndOf="@id/lastVisitedTextView"
             android:layout_toRightOf="@id/lastVisitedTextView"
             android:text="@string/neverVisited"
             android:layout_marginLeft="4dp"
-            android:layout_marginStart="4dp"
-            android:textSize="@dimen/ribbonSubViewTextSize"/>
+            android:layout_marginStart="4dp"/>
 
         <TextView
             android:id="@+id/translationView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/ribbonSubViewText"
             android:layout_marginLeft="12dp"
             android:layout_marginStart="12dp"
             android:layout_toRightOf="@id/lastVisitedDateView"
@@ -47,8 +42,7 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:gravity="end"
-            android:text="@string/translationViewDefaultText"
-            android:textSize="@dimen/ribbonSubViewTextSize"/>
+            android:text="@string/translationViewDefaultText"/>
     </RelativeLayout>
 
     <LinearLayout
@@ -68,9 +62,10 @@
             android:text="@string/defaultRibbonName"
             android:ellipsize="end"
             android:maxLines="2"
-            android:textSize="@dimen/ribbonTextSize"/>
+            android:textSize="@dimen/ribbonTextSize"
+            android:textColor="@color/ribbonViewTextColor"/>
 
-        <TextView
+        <View
             android:id="@+id/ribbonViewEmptyView"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -83,7 +78,8 @@
             android:layout_weight="5"
             android:gravity="end"
             android:text="@string/defaultReference"
-            android:textSize="@dimen/ribbonTextSize"/>
+            android:textSize="@dimen/ribbonTextSize"
+            android:textColor="@color/ribbonViewTextColor"/>
     </LinearLayout>
 
 </RelativeLayout>

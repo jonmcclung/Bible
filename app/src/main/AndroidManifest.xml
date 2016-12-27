@@ -22,6 +22,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".ReadingActivity" android:theme="@style/AppThemeNoActionBar"/>
+        <activity android:name=".SelectorActivity" android:theme="@style/AppTheme"/>
     </application>
 
 </manifest>

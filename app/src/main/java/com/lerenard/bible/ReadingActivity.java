@@ -1,5 +1,6 @@
 package com.lerenard.bible;
 
+import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -25,6 +26,7 @@ import java.util.TimerTask;
 public class ReadingActivity extends AppCompatActivity {
     public static final String RIBBON_KEY = "RIBBON_KEY", CURRENT_POSITION_KEY = "CURRENT_POSITION_KEY";
     private static final String TAG = "ReadingActivity_";
+    private static final int SELECT_REFERENCE_CODE = 1;
     private TextView bookNameView;
     private TextView chapterNameView;
     private TextView translationNameView;
@@ -62,6 +64,25 @@ public class ReadingActivity extends AppCompatActivity {
         translationNameView = (TextView) findViewById(R.id.translation_name_view);
         scrollView = (ScrollView) findViewById(R.id.scrollView);
 
+        bookNameView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), SelectorActivity.class);
+                intent.putExtra(SelectorFragment.SELECTOR_POS_KEY, SelectorPosition.BOOK_POSITION);
+                intent.putExtra(SelectorFragment.REFERENCE_KEY, Reference.fromPosition(currentPosition));
+                startActivityForResult(intent, SELECT_REFERENCE_CODE);
+            }
+        });
+
+        chapterNameView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), SelectorActivity.class);
+                intent.putExtra(SelectorFragment.SELECTOR_POS_KEY, SelectorPosition.CHAPTER_POSITION);
+                intent.putExtra(SelectorFragment.REFERENCE_KEY, Reference.fromPosition(currentPosition));
+                startActivityForResult(intent, SELECT_REFERENCE_CODE);
+            }
+        });
 
         final Bundle extras = getIntent().getExtras();
         Ribbon ribbon = extras.getParcelable(RIBBON_KEY);

@@ -15,8 +15,6 @@ import java.sql.Date;
 public class Ribbon implements Parcelable {
     private static final String defaultName = HomeActivity.getContext().getString(R.string.defaultRibbonName);
 
-
-
     private static final String TAG = "Ribbon_";
     private @NonNull
     Translation translation;

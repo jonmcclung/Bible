@@ -23,6 +23,8 @@
 
         <TextView
             android:id="@+id/chapter_name_view"
+            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
             style="@style/activity_reading_reference_info_view_style"/>
 
         <View

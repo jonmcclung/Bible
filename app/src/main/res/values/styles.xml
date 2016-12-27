@@ -15,6 +15,16 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="colorControlHighlight">@color/ripple</item>
     </style>
+    <style name="ribbonViewText" parent="Widget.AppCompat.TextView.SpinnerItem">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/ribbonViewTextColor</item>
+        <item name="android:textSize">24sp</item>
+    </style>
+
+    <style name="ribbonSubViewText" parent="ribbonViewText">
+        <item name="android:textSize">18sp</item>
+    </style>
 
 
     <style name="chapterTextStyle" parent="@android:style/TextAppearance.Widget.TextView">
@@ -38,7 +48,14 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:padding">8dp</item>
         <item name="android:textColor">@android:color/white</item>
+        <item name="android:background">@drawable/rounded_info_view_button_background</item>
+        <item name="android:foreground">?attr/selectableItemBackground</item>
+        <item name="android:clickable">true</item>
         <item name="android:textSize">@dimen/activity_reading_reference_info_view_textSize</item>
+    </style>
+
+    <style name="tabTextAppearance">
+        <item name="android:textSize">18sp</item>
     </style>
 
 </resources>
