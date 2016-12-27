@@ -26,16 +26,26 @@ public class SelectorFragment extends Fragment {
 
     private SelectorPosition position;
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable(SELECTOR_POS_KEY, position);
+        outState.putParcelable(REFERENCE_KEY, reference);
+    }
+
     public static final String
             SELECTOR_POS_KEY = "SELECTOR_POS_KEY",
             REFERENCE_KEY = "REFERENCE_KEY";
 
+    private void restoreArguments(Bundle args) {
+        reference = args.getParcelable(REFERENCE_KEY);
+        position = (SelectorPosition) args.getSerializable(SELECTOR_POS_KEY);
+    }
+
     @Override
     public void setArguments(Bundle args) {
         super.setArguments(args);
-
-        reference = args.getParcelable(REFERENCE_KEY);
-        position = (SelectorPosition) args.getSerializable(SELECTOR_POS_KEY);
+        restoreArguments(args);
     }
 
     @Nullable
@@ -43,6 +53,9 @@ public class SelectorFragment extends Fragment {
     public View onCreateView(
             LayoutInflater inflater, @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            restoreArguments(savedInstanceState);
+        }
         View rootView = inflater.inflate(R.layout.fragment_reference_selector, container, false);
         SelectorAdapter adapter = new SelectorAdapter(getFragmentManager(), reference);
         pager = (ViewPager) rootView.findViewById(R.id.reference_selector_pager);

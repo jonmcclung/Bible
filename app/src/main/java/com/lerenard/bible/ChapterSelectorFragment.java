@@ -22,6 +22,9 @@ public class ChapterSelectorFragment extends SelectorFragmentTab {
     public View onCreateView(
             LayoutInflater inflater, @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            restoreArguments(savedInstanceState);
+        }
         final View rootView =
                 inflater.inflate(R.layout.fragment_chapter_selector, container, false);
         final RecyclerView recyclerView =

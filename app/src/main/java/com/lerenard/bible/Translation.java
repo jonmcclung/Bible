@@ -1,5 +1,6 @@
 package com.lerenard.bible;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -24,13 +25,13 @@ import java.util.Map;
  */
 public class Translation implements Parcelable {
 
+
     protected Translation(Parcel in) {
         name = in.readString();
         Translation cached = get(name);
         if (cached == null) {
             throw new IllegalStateException(
-                    "Tried to read translation from parcel, but books were not cached. name: " +
-                    name);
+                    "Tried to read translation from parcel, but books were not cached. name: " + name);
         }
         else {
             books = cached.books;
@@ -70,6 +71,30 @@ public class Translation implements Parcelable {
             return allTranslations.get(name);
         }
         return null;
+    }
+
+    private static Translation loadTranslation(Context context, String path, String name) {
+        try {
+            InputStream file = context.getAssets().open(path);
+            Translation translation = Translation.fromJson(name, file);
+            Translation.add(translation);
+            file.close();
+            return translation;
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    public static Translation get(Context context, String name) {
+        if (!allTranslations.containsKey(name)) {
+            final Translation res =
+                    loadTranslation(context, "bibles/" + name + "/" + name + ".json", name);
+            allTranslations.put(name, res);
+            return res;
+        }
+        else {
+            return allTranslations.get(name);
+        }
     }
 
     public List<Book> getBooks() {

@@ -142,18 +142,6 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
         }
     }
 
-    private Translation loadTranslation(String path, String name) {
-        try {
-            InputStream file = getAssets().open(path);
-            Translation translation = Translation.fromJson(name, file);
-            Translation.add(translation);
-            file.close();
-            return translation;
-        } catch (IOException e) {
-            return null;
-        }
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -262,7 +250,7 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
         context = getApplicationContext();
         setContentView(R.layout.activity_home);
 
-        Translation NIV = loadTranslation("bibles/NIV/NIV.json", "NIV");
+        Translation NIV = Translation.get(this, "NIV");
         if (NIV != null) {
             Translation.setDefault(NIV);
         }
@@ -277,6 +265,7 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
         ArrayList<Ribbon> ribbons = new ArrayList<>();
         ribbons.add(new Ribbon());
         ribbons.add(new Ribbon(NIV, new Reference("1 John", 1, 1), "something else"));
+        ribbons.add(new Ribbon(NIV, new Reference("Mark", 1, 1), "personal reading"));
 
         RibbonAdapter adapter = null;
 

@@ -30,8 +30,18 @@ public class SelectorFragmentTab extends Fragment implements ReferenceSelectorIt
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(SelectorFragment.REFERENCE_KEY, reference);
+    }
+
+    protected void restoreArguments(Bundle args) {
+        reference = args.getParcelable(SelectorFragment.REFERENCE_KEY);
+    }
+
+    @Override
     public void setArguments(Bundle args) {
         super.setArguments(args);
-        reference = args.getParcelable(SelectorFragment.REFERENCE_KEY);
+        restoreArguments(args);
     }
 }

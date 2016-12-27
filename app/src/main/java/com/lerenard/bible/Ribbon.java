@@ -13,7 +13,6 @@ import java.sql.Date;
  * Created by mc on 18-Dec-16.
  */
 public class Ribbon implements Parcelable {
-    private static final String defaultName = HomeActivity.getContext().getString(R.string.defaultRibbonName);
 
     private static final String TAG = "Ribbon_";
     private @NonNull
@@ -85,7 +84,7 @@ public class Ribbon implements Parcelable {
     public Ribbon() {
         this.translation = Translation.getDefault();
         this.reference = Reference.getDefault();
-        this.name = defaultName;
+        this.name = null;
         lastVisited = new Date(0);
         lastVisitedText = HomeActivity.getContext().getString(R.string.neverVisited);
     }
