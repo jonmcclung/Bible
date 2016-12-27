@@ -4,14 +4,10 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * Created by mc on 25-Dec-16.
@@ -39,7 +35,7 @@ public class ChapterSelectorFragment extends SelectorFragmentTab {
         recyclerView.addItemDecoration(new RecyclerViewItemDecorator(0));
         ChapterSelectorAdapter adapter =
                 new ChapterSelectorAdapter(Book.getChapterCount(this.reference.getBookIndex()),
-                                           this.reference.getChapter(), this);
+                                           this.reference.getChapter(), getContext(), this);
         recyclerView.setAdapter(adapter);
         recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(
                 new ViewTreeObserver.OnGlobalLayoutListener() {
