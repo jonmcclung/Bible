@@ -22,20 +22,28 @@ public class RecyclerAdapter<T, VH extends RecyclerViewHolder<T>>
 
     private static String TAG = "RecyclerAdapter_";
     protected final DataSetListener<T> listener;
-
-    public void setSelectedColor(int selectedColor) {
-        this.selectedColor = selectedColor;
-    }
-
-    public void setUnselectedColor(int unselectedColor) {
-        this.unselectedColor = unselectedColor;
-    }
-
     protected final Supplier<VH> supplier;
-    private int selectedColor;
-    private int unselectedColor;
     protected ArrayList<T> items;
     protected int layout;
+    private int selectedColor;
+    private int unselectedColor;
+    public RecyclerAdapter(
+            ArrayList<T> items,
+            DataSetListener<T> listener,
+            int layout,
+            Supplier<VH> supplier,
+            int unselectedColor,
+            int selectedColor
+    ) {
+        this.items = items;
+        this.listener = listener;
+        this.layout = layout;
+        this.supplier = supplier;
+        this.selectedColor = selectedColor;
+        this.unselectedColor = unselectedColor;
+        Log.d(TAG, "selected: " + Integer.toHexString(selectedColor) + "; unselected: " +
+                   Integer.toHexString(unselectedColor));
+    }
 
     @Override
     public boolean onItemMove(int fromPosition, int toPosition) {
@@ -63,14 +71,6 @@ public class RecyclerAdapter<T, VH extends RecyclerViewHolder<T>>
         insert(items.size(), t, notify);
     }
 
-    void set(int index, T t, boolean notify) {
-        items.set(index, t);
-        notifyItemChanged(index);
-        if (notify) {
-            listener.onUpdate(t);
-        }
-    }
-
     void insert(int index, T t, boolean notify) {
         items.add(index, t);
         notifyItemInserted(index);
@@ -79,22 +79,12 @@ public class RecyclerAdapter<T, VH extends RecyclerViewHolder<T>>
         }
     }
 
-
-    public RecyclerAdapter(
-            ArrayList<T> items,
-            DataSetListener<T> listener,
-            int layout,
-            Supplier<VH> supplier,
-            int unselectedColor,
-            int selectedColor
-    ) {
-        this.items = items;
-        this.listener = listener;
-        this.layout = layout;
-        this.supplier = supplier;
-        this.selectedColor = selectedColor;
-        this.unselectedColor = unselectedColor;
-        Log.d(TAG, "selected: " + Integer.toHexString(selectedColor) + "; unselected: " + Integer.toHexString(unselectedColor));
+    void set(int index, T t, boolean notify) {
+        items.set(index, t);
+        notifyItemChanged(index);
+        if (notify) {
+            listener.onUpdate(t);
+        }
     }
 
     @Override
@@ -123,7 +113,15 @@ public class RecyclerAdapter<T, VH extends RecyclerViewHolder<T>>
         return selectedColor;
     }
 
+    public void setSelectedColor(int selectedColor) {
+        this.selectedColor = selectedColor;
+    }
+
     public int getUnselectedColor() {
         return unselectedColor;
+    }
+
+    public void setUnselectedColor(int unselectedColor) {
+        this.unselectedColor = unselectedColor;
     }
 }

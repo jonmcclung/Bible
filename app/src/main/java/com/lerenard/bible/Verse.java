@@ -8,23 +8,6 @@ import android.os.Parcelable;
  */
 public class Verse implements Parcelable {
 
-    public Verse() {}
-
-    @Override
-    public String toString() {
-        return text;
-    }
-
-    public Verse(String text) {
-        this.text = text;
-    }
-
-    private String text;
-
-    protected Verse(Parcel in) {
-        text = in.readString();
-    }
-
     public static final Creator<Verse> CREATOR = new Creator<Verse>() {
         @Override
         public Verse createFromParcel(Parcel in) {
@@ -36,6 +19,22 @@ public class Verse implements Parcelable {
             return new Verse[size];
         }
     };
+    private String text;
+
+    public Verse() {}
+
+    public Verse(String text) {
+        this.text = text;
+    }
+
+    protected Verse(Parcel in) {
+        text = in.readString();
+    }
+
+    @Override
+    public String toString() {
+        return text;
+    }
 
     public String getText() {
         return text;

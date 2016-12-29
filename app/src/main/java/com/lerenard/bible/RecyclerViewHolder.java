@@ -1,14 +1,7 @@
 package com.lerenard.bible;
 
-import android.graphics.Color;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.TextView;
-
-import java.lang.reflect.Constructor;
-import java.util.EventListenerProxy;
-import java.util.Locale;
 
 import co.paulburke.android.itemtouchhelperdemo.helper.ItemTouchHelperViewHolder;
 

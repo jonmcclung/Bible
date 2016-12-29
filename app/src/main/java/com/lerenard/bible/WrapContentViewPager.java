@@ -21,7 +21,6 @@ public class WrapContentViewPager extends ViewPager {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int height = 0;
         View child = findViewWithTag(getCurrentItem());
-        Log.d(TAG, "I need a child with tag " + getCurrentItem() + "! Child is " + child);
         if (child != null) {
             child.measure(
                     widthMeasureSpec, MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));

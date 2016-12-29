@@ -2,32 +2,13 @@ package com.lerenard.bible;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by mc on 18-Dec-16.
  */
 public class Chapter implements Parcelable {
-
-    public Chapter() {}
-
-    @Override
-    public String toString() {
-        return "<Chapter(verses: " + getCount() + ")>";
-    }
-
-    public Chapter(ArrayList<Verse> verses) {
-        this.verses = verses;
-    }
-
-    private ArrayList<Verse> verses;
-
-    protected Chapter(Parcel in) {
-        verses = in.createTypedArrayList(Verse.CREATOR);
-    }
 
     public static final Creator<Chapter> CREATOR = new Creator<Chapter>() {
         @Override
@@ -40,9 +21,36 @@ public class Chapter implements Parcelable {
             return new Chapter[size];
         }
     };
+    private ArrayList<Verse> verses;
+    private int index;
 
-    public void setVerses(ArrayList<Verse> verses) {
+    public Chapter() {}
+
+    public Chapter(int index) {
+        this.index = index;
+    }
+
+    public Chapter(ArrayList<Verse> verses, int index) {
+        this(index);
         this.verses = verses;
+    }
+
+    protected Chapter(Parcel in) {
+        verses = in.createTypedArrayList(Verse.CREATOR);
+        index = in.readInt();
+    }
+
+    @Override
+    public String toString() {
+        return "<Chapter(verses: " + getVerseCount() + ")>";
+    }
+
+    public int getVerseCount() {
+        return verses.size();
+    }
+
+    public int getIndex() {
+        return index;
     }
 
     /**
@@ -57,10 +65,6 @@ public class Chapter implements Parcelable {
         }
     }
 
-    public int getCount() {
-        return verses.size();
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -69,9 +73,14 @@ public class Chapter implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeTypedList(verses);
+        parcel.writeInt(index);
     }
 
     public ArrayList<Verse> getVerses() {
         return verses;
+    }
+
+    public void setVerses(ArrayList<Verse> verses) {
+        this.verses = verses;
     }
 }

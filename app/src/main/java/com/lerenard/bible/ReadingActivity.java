@@ -1,107 +1,73 @@
 package com.lerenard.bible;
 
 import android.content.Intent;
-import android.support.annotation.Nullable;
+import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
-import android.text.style.TextAppearanceSpan;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class ReadingActivity extends AppCompatActivity {
-    public static final String RIBBON_KEY = "RIBBON_KEY", CURRENT_POSITION_KEY = "CURRENT_POSITION_KEY";
+    public static final String RIBBON_KEY = "RIBBON_KEY", CURRENT_POSITION_KEY =
+            "CURRENT_POSITION_KEY";
     private static final String TAG = "ReadingActivity_";
     private static final int SELECT_REFERENCE_CODE = 1;
+    private int currentPosition = -1;
     private TextView bookNameView;
     private TextView chapterNameView;
-    private TextView translationNameView;
-    private ChapterPagerAdapter adapter;
     private ViewPager pager;
     private ScrollView scrollView;
-    int currentPosition = -1;
+    private Ribbon ribbon;
+    private TextView translationNameView;
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt(CURRENT_POSITION_KEY, pager.getCurrentItem());
-    }
-
-    private void updateInfoToolbar(Ribbon ribbon) {
-
-    }
-
-    private void updateInfoToolbar() {
-        Reference reference = Reference.fromPosition(pager.getCurrentItem());
-
-        bookNameView.setText(reference.getBookName());
-        chapterNameView.setText(
-                String.format(Locale.getDefault(), "%d", reference.getChapter()));
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case SELECT_REFERENCE_CODE:
+                    Reference reference = data.getExtras()
+                                              .getParcelable(SelectorFragment.REFERENCE_KEY);
+                    ribbon.updateIndices(reference);
+                    pager.setCurrentItem(ribbon.getPosition());
+                    updateInfoToolbar();
+                    break;
+                default:
+                    throw new IllegalStateException("unexpected requestCode: " + requestCode);
+            }
+        }
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "OnCreate, savedInstanceState: " + savedInstanceState);
         setContentView(R.layout.activity_reading);
 
-        bookNameView = (TextView) findViewById(R.id.book_name_view);
-        chapterNameView = (TextView) findViewById(R.id.chapter_name_view);
-        translationNameView = (TextView) findViewById(R.id.translation_name_view);
+        Bundle savedState =
+                (savedInstanceState == null ? getIntent().getExtras() : savedInstanceState);
+        ribbon = savedState.getParcelable(RIBBON_KEY);
+        currentPosition = ribbon.getPosition();
+
         scrollView = (ScrollView) findViewById(R.id.scrollView);
 
-        bookNameView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), SelectorActivity.class);
-                intent.putExtra(SelectorFragment.SELECTOR_POS_KEY, SelectorPosition.BOOK_POSITION);
-                intent.putExtra(SelectorFragment.REFERENCE_KEY, Reference.fromPosition(currentPosition));
-                startActivityForResult(intent, SELECT_REFERENCE_CODE);
-            }
-        });
+        bookNameView = (TextView) findViewById(R.id.book_name_view);
+        bookNameView.setOnClickListener(
+                new StartSelectorFragmentListener(SelectorPosition.BOOK_POSITION));
 
-        chapterNameView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), SelectorActivity.class);
-                intent.putExtra(SelectorFragment.SELECTOR_POS_KEY, SelectorPosition.CHAPTER_POSITION);
-                intent.putExtra(SelectorFragment.REFERENCE_KEY, Reference.fromPosition(currentPosition));
-                startActivityForResult(intent, SELECT_REFERENCE_CODE);
-            }
-        });
+        chapterNameView = (TextView) findViewById(R.id.chapter_name_view);
+        chapterNameView.setOnClickListener(
+                new StartSelectorFragmentListener(SelectorPosition.CHAPTER_POSITION));
 
-        final Bundle extras = getIntent().getExtras();
-        Ribbon ribbon = extras.getParcelable(RIBBON_KEY);
-        assert ribbon != null : Log.e(TAG, "somehow ribbon is null.");
-
-//        LinearLayout toolBar = (LinearLayout) findViewById(R.id.activity_reading_toolbar);
+        translationNameView = (TextView) findViewById(R.id.translation_name_view);
         translationNameView.setText(ribbon.getTranslation().getName());
 
+        ChapterPagerAdapter adapter = new ChapterPagerAdapter(ribbon, getSupportFragmentManager());
+
         pager = (ViewPager) findViewById(R.id.chapter_pager);
-        adapter = new ChapterPagerAdapter(ribbon, getSupportFragmentManager());
         pager.setAdapter(adapter);
-        if (savedInstanceState == null) {
-            currentPosition = ribbon.getReference().getPosition();
-        }
-        else {
-            currentPosition = savedInstanceState.getInt(CURRENT_POSITION_KEY);
-        }
         pager.setCurrentItem(currentPosition);
-        Log.d(TAG, "set current item to " + ribbon.getReference());
         pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
 
             @Override
@@ -110,40 +76,48 @@ public class ReadingActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
-                Log.d(
-                        TAG,
-                        "now at " + position + " (" + Reference.fromPosition(position) + ")");
-                updateInfoToolbar();
+                if (currentPosition != pager.getCurrentItem()) {
+                    scrollView.smoothScrollTo(0, 0);
+                    updateInfoToolbar();
+                }
             }
 
             @Override
-            public void onPageScrollStateChanged(int state) {
-
-                // TODO
-                if (state == ViewPager.SCROLL_STATE_IDLE && currentPosition != pager.getCurrentItem()) {
-                    scrollView.smoothScrollTo(0, 0);
-                    currentPosition = pager.getCurrentItem();
-                    Log.d(TAG, "current item is now " + currentPosition);
-                }
-            }
+            public void onPageScrollStateChanged(int state) {}
         });
-        updateInfoToolbar();
-        /*pager.getViewTreeObserver().addOnGlobalLayoutListener(
-                new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        Log.d(TAG, "onGlobalLayout");
-                        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                                ViewGroup.LayoutParams.WRAP_CONTENT,
-                                ViewGroup.LayoutParams.WRAP_CONTENT);
-                        final View view = pager.findViewWithTag(pager.getCurrentItem());
-                        params.width = view.getWidth();
 
-                        params.height = view.getScreenB();
-                        Log.d(TAG, "width: " + params.width + ", height: " + params.height);
-                        pager.setLayoutParams(params);
-                        pager.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                    }
-                });*/
+        updateInfoToolbar();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(RIBBON_KEY, ribbon);
+    }
+
+    private void updateInfoToolbar() {
+        currentPosition = pager.getCurrentItem();
+        ribbon.setPosition(currentPosition);
+
+        bookNameView.setText(ribbon.getBookName());
+        chapterNameView.setText(
+                String.format(Locale.getDefault(), "%d", ribbon.getChapterIndex()));
+        translationNameView.setText(ribbon.getTranslation().getName());
+    }
+
+    class StartSelectorFragmentListener implements View.OnClickListener {
+        private SelectorPosition selectorPosition;
+
+        public StartSelectorFragmentListener(SelectorPosition selectorPosition) {
+            this.selectorPosition = selectorPosition;
+        }
+
+        @Override
+        public void onClick(View view) {
+            Intent intent = new Intent(getApplicationContext(), SelectorActivity.class);
+            intent.putExtra(SelectorFragment.SELECTOR_POS_KEY, selectorPosition);
+            intent.putExtra(SelectorFragment.REFERENCE_KEY, ribbon.getReference());
+            startActivityForResult(intent, SELECT_REFERENCE_CODE);
+        }
     }
 }

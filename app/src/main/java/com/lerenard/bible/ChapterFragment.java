@@ -6,14 +6,12 @@ import android.support.v4.app.Fragment;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.TextAppearanceSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 /**
@@ -33,23 +31,23 @@ public class ChapterFragment extends Fragment {
         super.setArguments(args);
         if (args != null) {
             ribbon = args.getParcelable(ReadingActivity.RIBBON_KEY);
-            Log.d(TAG, "successfully received ribbon: " + ribbon + " this: " + this);
         }
     }
 
+    @Nullable
+    @Override
+    public View onCreateView(
+            LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            ribbon = savedInstanceState.getParcelable(ReadingActivity.RIBBON_KEY);
+        }
+        View root = inflater.inflate(R.layout.fragment_reading, container, false);
+        root.setTag(ribbon.getReference().getPosition());
+        TextView text = ((TextView) root.findViewById(R.id.chapterText));
+        text.setText(getChapterText(ribbon.getChapter()));
 
-    private void addSubscript(SpannableStringBuilder builder, int number) {
-        int oldLength = builder.length();
-        builder.append(String.format(
-                Locale.getDefault(),
-                "%d",
-                number));
-
-        builder.setSpan(
-                new TextAppearanceSpan(getContext(), R.style.verseNumberStyle),
-                oldLength,
-                builder.length(),
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return root;
     }
 
     private SpannableStringBuilder getChapterText(Chapter chapter) {
@@ -65,27 +63,23 @@ public class ChapterFragment extends Fragment {
         return builder;
     }
 
+    private void addSubscript(SpannableStringBuilder builder, int number) {
+        int oldLength = builder.length();
+        builder.append(String.format(
+                Locale.getDefault(),
+                "%d",
+                number));
+
+        builder.setSpan(
+                new TextAppearanceSpan(getContext(), R.style.verseNumberStyle),
+                oldLength,
+                builder.length(),
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+    }
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelable(ReadingActivity.RIBBON_KEY, ribbon);
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(
-            LayoutInflater inflater, @Nullable ViewGroup container,
-            @Nullable Bundle savedInstanceState) {
-        if (savedInstanceState != null) {
-            ribbon = savedInstanceState.getParcelable(ReadingActivity.RIBBON_KEY);
-        }
-        Log.d(TAG, "ribbon is " + ribbon + " this: " + this);
-        View root = inflater.inflate(R.layout.fragment_reading, container, false);
-        root.setTag(ribbon.getReference().getPosition());
-        Log.d(TAG, "I set the view's tag to " + ribbon.getReference().getPosition() + "! " + root);
-        TextView text = ((TextView) root.findViewById(R.id.chapterText));
-        text.setText(getChapterText(ribbon.getChapter()));
-
-        return root;
     }
 }

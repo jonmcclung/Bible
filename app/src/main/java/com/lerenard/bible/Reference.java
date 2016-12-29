@@ -33,42 +33,6 @@ public class Reference implements Parcelable {
             "Col", "1 Th", "2 Th", "1 Tim", "2 Tim", "Titus", "Phlm",
             "Heb", "James", "1 Pet", "2 Pet", "1 Jn", "2 Jn", "3 Jn", "Jude", "Rev");
 
-    private static Reference defaultReference = new Reference("Genesis", 1, 1);
-
-    private static final int[] cumulativeChapterCount = {
-            50, 90, 117, 153, 187, 211, 232, 236, 267, 291, 313, 338, 367, 403, 413, 426, 436, 478,
-            628, 659, 671, 679, 745, 797, 802, 850, 862, 876, 879, 888, 889, 893, 900, 903, 906,
-            909, 911, 925, 929, 957, 973, 997, 1018, 1046, 1062, 1078, 1091, 1097, 1103, 1107, 1111,
-            1116, 1119, 1125, 1129, 1132, 1133, 1146, 1151, 1156, 1159, 1164, 1165, 1166, 1167,
-            1189};
-    private int position;
-
-    public static Reference fromPosition(int position) {
-        int index = Arrays.binarySearch(cumulativeChapterCount, position);
-        if (index >= 0) {  // it is the first chapter of the next book, so increment index
-            ++index;
-        }
-        else {  // the exact chapter count was not found
-            /* converting to insertion point: the first index that held a value greater than
-            calculatePosition, also the index of the book it belongs in*/
-            index = -(index + 1);
-            if (index == cumulativeChapterCount.length) {
-                return null;  // invalid calculatePosition
-            }
-        }
-        int chapterIndex = position + 1 - (index == 0 ? 0 : cumulativeChapterCount[index - 1]);
-        return new Reference(index, chapterIndex, 1);
-    }
-
-    protected Reference(Parcel in) {
-        bookIndex = in.readInt();
-        chapter = in.readInt();
-        verse = in.readInt();
-        bookName = allBooks.get(bookIndex);
-        bookAbbreviation = abbreviations.get(bookIndex);
-        updatePosition();
-    }
-
     public static final Creator<Reference> CREATOR = new Creator<Reference>() {
         @Override
         public Reference createFromParcel(Parcel in) {
@@ -81,21 +45,117 @@ public class Reference implements Parcelable {
         }
     };
 
+    private static final int[] cumulativeChapterCount = {
+            50, 90, 117, 153, 187, 211, 232, 236, 267, 291, 313, 338, 367, 403, 413, 426, 436, 478,
+            628, 659, 671, 679, 745, 797, 802, 850, 862, 876, 879, 888, 889, 893, 900, 903, 906,
+            909, 911, 925, 929, 957, 973, 997, 1018, 1046, 1062, 1078, 1091, 1097, 1103, 1107, 1111,
+            1116, 1119, 1125, 1129, 1132, 1133, 1146, 1151, 1156, 1159, 1164, 1165, 1166, 1167,
+            1189};
+
+
+    private Translation translation;
+    private int position;
+    private int bookIndex;
+    private int chapterIndex, verse;
+
+    protected Reference(Parcel in) {
+        bookIndex = in.readInt();
+        chapterIndex = in.readInt();
+        verse = in.readInt();
+        translation = in.readParcelable(Translation.class.getClassLoader());
+        updatePosition();
+    }
+
+    /**
+     * updates position from indices
+     */
+    private void updatePosition() {
+        if (bookIndex == 0) {
+            position = chapterIndex - 1;
+        }
+        else {
+            position = cumulativeChapterCount[bookIndex - 1] + chapterIndex - 1;
+        }
+    }
+
     public Reference(Reference reference) {
-        this(reference.bookIndex, reference.chapter, reference.verse);
+        this(reference.bookIndex, reference.chapterIndex, reference.verse, reference.translation);
+    }
+
+    public Reference(int bookIndex, int chapterIndex, int verse, Translation translation) {
+        this(chapterIndex, verse, translation);
+        this.bookIndex = bookIndex;
+        updatePosition();
+    }
+
+    private Reference(
+            int chapterIndex, int verse, Translation translation) {
+        this.chapterIndex = chapterIndex;
+        this.verse = verse;
+        this.translation = translation;
+    }
+
+    public Reference(String bookName, int chapterIndex, int verse, Translation translation) {
+        this(chapterIndex, verse, translation);
+        bookIndex = allBooks.indexOf(bookName);
+        if (bookIndex == -1) {
+            bookIndex = abbreviations.indexOf(bookName);
+            if (bookIndex == -1) {
+                throw new IllegalArgumentException(
+                        "I can't find a bookName with the name " + bookName);
+            }
+        }
+        updatePosition();
+    }
+/*
+    public static Reference fromPosition(int position) {
+        return fromPosition(position, null);
+    }
+
+    public static Reference fromPosition(int position, Translation translation) {
+    }*/
+
+    public static Reference parseString(String reference) {
+        return null;
+        // TODO
+    }
+
+    public static Reference getDefault() {
+        return new Reference("Genesis", 1, 1, Translation.getDefault());
+    }
+
+    public static int getTotalChapterCount() {
+        return cumulativeChapterCount[cumulativeChapterCount.length - 1];
+    }
+
+    public Translation getTranslation() {
+        return translation;
+    }
+
+    public void setTranslation(Translation translation) {
+        this.translation = translation;
     }
 
     public String getBookName() {
-        return bookName;
+        return allBooks.get(bookIndex);
     }
 
-    public int getChapter() {
-        return chapter;
+    public int getChapterIndex() {
+        return chapterIndex;
     }
 
-    public void setChapter(int chapter) {
-        this.chapter = chapter;
+    public void setChapterIndex(int chapter) {
+        this.chapterIndex = chapter;
+        setVerse(Math.min(verse, getChapter().getVerseCount()));
         updatePosition();
+    }
+
+    public Chapter getChapter() {
+        return getBook().getChapter(chapterIndex);
+    }
+
+    public void setChapter(Chapter chapter) {
+        setChapterIndex(chapter.getIndex());
     }
 
     public int getVerse() {
@@ -103,6 +163,11 @@ public class Reference implements Parcelable {
     }
 
     public void setVerse(int verse) {
+        if (verse < 1 || verse > getChapter().getVerseCount()) {
+            throw new IllegalArgumentException(
+                    "verse must be between 1 and the number of verses in the chapter. Book: " +
+                    getBookName() + ", Chapter: " + chapterIndex + ":" + verse);
+        }
         this.verse = verse;
     }
 
@@ -112,72 +177,22 @@ public class Reference implements Parcelable {
 
     public void setBookIndex(int bookIndex) {
         this.bookIndex = bookIndex;
+        setChapterIndex(Math.min(chapterIndex, translation.getBook(bookIndex).getChapterCount()));
         updatePosition();
-    }
-
-    private String bookName, bookAbbreviation;
-    private int bookIndex;
-    private int chapter, verse;
-
-    public Reference(String bookName, int chapter, int verse) {
-        this(chapter, verse);
-        this.bookName = bookName;
-        bookIndex = allBooks.indexOf(bookName);
-        if (bookIndex == -1) {
-            bookIndex = abbreviations.indexOf(bookName);
-            if (bookIndex == -1) {
-                throw new IllegalArgumentException(
-                        "I can't find a bookName with the name " + bookName);
-            }
-            else {
-                bookAbbreviation = bookName;
-                this.bookName = allBooks.get(bookIndex);
-            }
-        }
-    }
-
-    private Reference(int chapter, int verse) {
-        this.chapter = chapter;
-        this.verse = verse;
-    }
-
-    public Reference(String bookName, int bookIndex, int chapter, int verse) {
-        this(bookIndex, chapter, verse);
-        if (!bookName.equals(this.bookName)) {
-            if (!bookName.equals(this.bookAbbreviation)) {
-                throw new IllegalArgumentException(
-                        "The bookName " + bookName + " does not match the given bookIndex of " +
-                        bookIndex +
-                        ". Expected value was one of " + this.bookName + " and " +
-                        abbreviations.get(bookIndex));
-            }
-        }
-    }
-
-    public Reference(int bookIndex, int chapter, int verse) {
-        this(chapter, verse);
-        this.bookIndex = bookIndex;
-        this.bookName = allBooks.get(bookIndex);
-        this.bookAbbreviation = abbreviations.get(bookIndex);
-        updatePosition();
-    }
-
-    public Reference() {}
-
-    public String getUIString() {
-        return bookName + " " + String.valueOf(chapter) + ":" + String.valueOf(verse);
     }
 
     @Override
     public String toString() {
-         return getUIString() + " (position: " + position + ")";
+        return getUIString() + ", translation: " + translation + ", position: " + position + "";
     }
 
-    public static Reference parseString(String reference) {
-        return null;
-        // TODO
+    public String getUIString() {
+        return getBookName() + " " + String.valueOf(chapterIndex) + ":" + String.valueOf(verse);
     }
 
+    public Book getBook() {
+        return translation.getBook(bookIndex);
+    }
 
     @Override
     public int describeContents() {
@@ -187,32 +202,45 @@ public class Reference implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeInt(bookIndex);
-        parcel.writeInt(chapter);
+        parcel.writeInt(chapterIndex);
         parcel.writeInt(verse);
-    }
-
-    public static Reference getDefault() {
-        return defaultReference;
-    }
-
-    public static int getTotalChapterCount() {
-        return cumulativeChapterCount[cumulativeChapterCount.length - 1];
-    }
-
-    /**
-     * @return the index of this reference's chapter in an ordered list of all chapters from
-     * Genesis 1 to the last chapter of Revelation.
-     */
-    private void updatePosition() {
-        if (bookIndex == 0) {
-            position = chapter - 1;
-        }
-        else {
-            position = cumulativeChapterCount[bookIndex - 1] + chapter - 1;
-        }
+        parcel.writeParcelable(translation, 0);
     }
 
     public int getPosition() {
         return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
+        updateIndices();
+    }
+
+    public void setIndices(int bookIndex, int chapterIndex) {
+        setBookIndex(bookIndex);
+        this.chapterIndex = chapterIndex;
+        updatePosition();
+    }
+
+    /**
+     * updates indices from position
+     */
+    private void updateIndices() {
+        bookIndex = Arrays.binarySearch(cumulativeChapterCount, position);
+        if (bookIndex >=
+            0) {  // it is the first chapterIndex of the next book, so increment bookIndex
+            ++bookIndex;
+        }
+        else {  // the exact chapterIndex count was not found
+            /* converting to insertion point: the first bookIndex that held a value greater than
+            calculatePosition, also the bookIndex of the book it belongs in*/
+            bookIndex = -(bookIndex + 1);
+            if (bookIndex == cumulativeChapterCount.length) {
+                throw new IllegalStateException(
+                        "bookIndex must not be equal to the last bookIndex. Index: " + bookIndex +
+                        ", max: " + cumulativeChapterCount.length);  // invalid position
+            }
+        }
+        chapterIndex = position + 1 - (bookIndex == 0 ? 0 : cumulativeChapterCount[bookIndex - 1]);
     }
 }

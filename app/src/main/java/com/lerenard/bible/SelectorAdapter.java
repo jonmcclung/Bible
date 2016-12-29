@@ -12,7 +12,36 @@ import static com.lerenard.bible.SelectorFragment.REFERENCE_KEY;
  */
 
 public class SelectorAdapter extends FragmentPagerAdapter {
-    private final Reference reference;
+    private final BookSelectorFragment bookSelectorFragment;
+    private final ChapterSelectorFragment chapterSelectorFragment;
+
+
+    public SelectorAdapter(FragmentManager fm, Reference reference) {
+        super(fm);
+        Bundle args = new Bundle();
+        args.putParcelable(REFERENCE_KEY, reference);
+        bookSelectorFragment = new BookSelectorFragment();
+        chapterSelectorFragment = new ChapterSelectorFragment();
+        bookSelectorFragment.setArguments(args);
+        chapterSelectorFragment.setArguments(args);
+    }
+
+    @Override
+    public Fragment getItem(int position) {
+        switch (SelectorPosition.values()[position]) {
+            case BOOK_POSITION:
+                return bookSelectorFragment;
+            case CHAPTER_POSITION:
+                return chapterSelectorFragment;
+            default:
+                throw new IllegalStateException("unexpected position: " + position);
+        }
+    }
+
+    @Override
+    public int getCount() {
+        return SelectorPosition.values().length;
+    }
 
     @Override
     public CharSequence getPageTitle(int position) {
@@ -27,32 +56,8 @@ public class SelectorAdapter extends FragmentPagerAdapter {
         }
     }
 
-    public SelectorAdapter(FragmentManager fm, Reference reference) {
-        super(fm);
-        this.reference = reference;
-    }
-
-    @Override
-    public Fragment getItem(int position) {
-        Bundle args = new Bundle();
-        args.putParcelable(REFERENCE_KEY, reference);
-        Fragment res;
-        switch (SelectorPosition.values()[position]) {
-            case BOOK_POSITION:
-                res = new BookSelectorFragment();
-                break;
-            case CHAPTER_POSITION:
-                res = new ChapterSelectorFragment();
-                break;
-            default:
-                throw new IllegalStateException("unexpected position: " + position);
-        }
-        res.setArguments(args);
-        return res;
-    }
-
-    @Override
-    public int getCount() {
-        return SelectorPosition.values().length;
+    public void setListener(ReferenceSelectorItemSelectedListener listener) {
+        bookSelectorFragment.setListener(listener);
+        chapterSelectorFragment.setListener(listener);
     }
 }

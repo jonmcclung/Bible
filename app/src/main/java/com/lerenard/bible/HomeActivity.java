@@ -1,22 +1,14 @@
 package com.lerenard.bible;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.res.AssetManager;
-import android.graphics.Canvas;
-import android.graphics.ColorFilter;
-import android.graphics.drawable.Drawable;
-import android.icu.text.DateFormat;
-import android.os.Environment;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -25,24 +17,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lerenard.bible.helper.FileAccess;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 import co.paulburke.android.itemtouchhelperdemo.helper.SimpleItemTouchHelperCallback;
 
@@ -51,9 +27,13 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 public class HomeActivity extends AppCompatActivity implements DataSetListener<Ribbon> {
 
     public static final int REQUEST_WRITE_STORAGE = 1;
-    private static boolean justAsked = false;
     private static final String TAG = "HomeActivity_";
+    private static boolean justAsked = false;
     private static Context context;
+
+    public static Context getContext() {
+        return context;
+    }
 
     @Override
     public void onAdd(Ribbon ribbon, int index) {
@@ -72,7 +52,8 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
 
     @Override
     public void onClick(Ribbon ribbon, int position) {
-        Intent intent = new Intent(this, ReadingActivity.class).putExtra(ReadingActivity.RIBBON_KEY, ribbon);
+        Intent intent = new Intent(this, ReadingActivity.class)
+                .putExtra(ReadingActivity.RIBBON_KEY, ribbon);
         startActivity(intent);
     }
 
@@ -84,22 +65,6 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
     @Override
     public void onLongPress(Ribbon ribbon, int position) {
 
-    }
-
-    public static Context getContext() {
-        return context;
-    }
-
-    static class Person {
-        public String name;
-        public int age;
-
-        public Person(String name, int age) {
-            this.name = name;
-            this.age = age;
-        }
-
-        public Person() {}
     }
 
     @Override
@@ -143,108 +108,6 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d(TAG, "resuming");
-        context = getApplicationContext();
-
-        /*String s = "{\"name\": \"Jon\", \"age\": 21}";
-
-        ObjectMapper mapper = new ObjectMapper();
-        Person jon;
-        try {
-            jon = mapper.readValue(s, Person.class);
-            Log.d(TAG, jon.name + ", " + jon.age);
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-            return;
-        }
-
-        TypeReference<JsonNode> typeReference =
-                new TypeReference<JsonNode>() {
-                };
-        try {
-            JsonNode map = mapper.readValue(
-                    "{\"hello\": {\"1\": \"one\", \"2\": \"two\"}, \"goodbye\": {\"2\": \"one\", " +
-                    "\"1\": \"two\"}}",
-                    typeReference);
-            Log.d(TAG, "this is the map: " + map.toString());
-
-            List<String> keys = Arrays.asList("hello", "goodbye");
-
-
-            ArrayList<ArrayList<String>> values = new ArrayList<>(keys.size());
-            for (int i = 0; i < keys.size(); ++i) {
-                values.add(null);
-            }
-
-            Log.d(TAG, "values should be full of null: " + values);
-            Iterator<Map.Entry<String, JsonNode>> fields = map.fields();
-            while (fields.hasNext()) {
-                Map.Entry<String, JsonNode> entry = fields.next();
-                ArrayList<String> list = new ArrayList<>();
-                values.set(keys.indexOf(entry.getKey()), list);
-                JsonNode node = entry.getValue();
-                int numFieldNames = node.size();
-                for (int i = 0; i < numFieldNames; ++i) {
-                    list.add(null);
-                }
-                Iterator<String> fieldNames = node.fieldNames();
-                while (fieldNames.hasNext()) {
-                    String fieldName = fieldNames.next();
-                    list.set(Integer.parseInt(fieldName) - 1, node.get(fieldName).asText());
-                }
-            }
-
-            Log.d(TAG, "this is values: " + values.toString());
-        } catch (IOException e) {
-            Log.d(TAG, "failed to load map ):");
-            e.printStackTrace();
-        }*/
-
-        /*if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-
-            if (justAsked) {
-                justAsked = false;
-            }
-            else {
-                Log.d(TAG, "attempting to acquire permissions");
-                ActivityCompat.requestPermissions(
-                        this,
-                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                        REQUEST_WRITE_STORAGE);
-            }
-        }
-        else {
-            List<Person> people = new ArrayList<>();
-            people.add(jon);
-            people.add(new Person("Bob", 24));
-            people.add(new Person("Sam", 9999));
-            people.add(new Person("José", 4));
-            if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-                File directory = FileAccess.getDocumentsDirectory(this);
-                if (directory == null) {
-                    Log.e(TAG, "Could not make directory.");
-                }
-                else {
-                    File file = new File(directory, "people.json");
-                    Log.d(TAG, "successfully created " + file.toString());
-                    try {
-                        mapper.writeValue(file, people);
-                        Log.d(TAG, "Wrote it!");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        Log.d(TAG, "failed");
-                    }
-                }
-            }
-        }*/
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = getApplicationContext();
@@ -264,8 +127,9 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
 
         ArrayList<Ribbon> ribbons = new ArrayList<>();
         ribbons.add(new Ribbon());
-        ribbons.add(new Ribbon(NIV, new Reference("1 John", 1, 1), "something else"));
-        ribbons.add(new Ribbon(NIV, new Reference("Mark", 1, 1), "personal reading"));
+        Log.d(TAG, "translation: " + ribbons.get(0).getTranslation() + ", default translation: " + Translation.getDefault());
+        ribbons.add(new Ribbon(new Reference("1 John", 1, 1, NIV), "something else"));
+        ribbons.add(new Ribbon(new Reference("Mark", 1, 1, NIV), "personal reading"));
 
         RibbonAdapter adapter = null;
 

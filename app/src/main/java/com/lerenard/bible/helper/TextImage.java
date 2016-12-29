@@ -6,7 +6,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.media.Image;
 import android.widget.ImageView;
 
 /**
@@ -26,7 +25,7 @@ public class TextImage {
         paint.setTextSize(textSize);
         paint.setTextAlign(Paint.Align.CENTER);
         paint.setTypeface(typeface);
-        canvas.drawText(text.toString(), width/2f, height/2f, paint);
+        canvas.drawText(text.toString(), width / 2f, height / 2f, paint);
 
         ImageView imageView = new ImageView(context);
         imageView.setImageBitmap(bitmap);

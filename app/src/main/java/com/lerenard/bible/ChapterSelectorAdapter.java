@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -23,10 +22,10 @@ public class ChapterSelectorAdapter
     private static final String TAG = "ChapterSelectorAdapter_";
     private final int chapterCount;
     private final Context context;
-    private View activeView;
     private final ReferenceSelectorItemSelectedListener listener;
-    private int currentSelection;
     private final Drawable selected, pressed, unselected;
+    private View activeView;
+    private int currentSelection;
 
     public ChapterSelectorAdapter(
             int chapterCount, int initialPosition, Context context,
@@ -35,15 +34,18 @@ public class ChapterSelectorAdapter
         this.context = context;
         this.listener = listener;
         this.currentSelection = initialPosition;
-        unselected = ContextCompat.getDrawable(context,
-                                               R.drawable
-                                                       .chapter_selector_button_unselected);
-        selected = ContextCompat.getDrawable(context,
-                                             R.drawable
-                                                     .chapter_selector_button_selected);
-        pressed = ContextCompat.getDrawable(context,
-                                             R.drawable
-                                                     .chapter_selector_button_pressed);
+        unselected = ContextCompat.getDrawable(
+                context,
+                R.drawable
+                        .chapter_selector_button_unselected);
+        selected = ContextCompat.getDrawable(
+                context,
+                R.drawable
+                        .chapter_selector_button_selected);
+        pressed = ContextCompat.getDrawable(
+                context,
+                R.drawable
+                        .chapter_selector_button_pressed);
     }
 
     @Override
@@ -109,6 +111,7 @@ public class ChapterSelectorAdapter
                 }
             });
         }
+
         public void setPosition(int position) {
             this.position = position + 1;
             if (this.position == currentSelection) {

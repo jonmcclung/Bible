@@ -1,7 +1,5 @@
 package com.lerenard.bible;
 
-import android.view.View;
-
 public interface DataSetListener<T> {
     void onAdd(final T t, int index);
 

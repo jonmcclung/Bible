@@ -3,9 +3,7 @@ package com.lerenard.bible;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 import android.text.format.DateFormat;
-import android.util.Log;
 
 import java.sql.Date;
 
@@ -13,23 +11,6 @@ import java.sql.Date;
  * Created by mc on 18-Dec-16.
  */
 public class Ribbon implements Parcelable {
-
-    private static final String TAG = "Ribbon_";
-    private @NonNull
-    Translation translation;
-    private Reference reference;
-    private String name;
-    private static final String dateFormatString = "dd MMM yyyy";
-    private CharSequence lastVisitedText;
-    private Date lastVisited;
-
-    protected Ribbon(Parcel in) {
-        translation = in.readParcelable(Translation.class.getClassLoader());
-        reference = in.readParcelable(Reference.class.getClassLoader());
-        name = in.readString();
-        lastVisited = new Date(in.readLong());
-        lastVisitedText = DateFormat.format(dateFormatString, lastVisited);
-    }
 
     public static final Creator<Ribbon> CREATOR = new Creator<Ribbon>() {
         @Override
@@ -42,6 +23,37 @@ public class Ribbon implements Parcelable {
             return new Ribbon[size];
         }
     };
+    private static final String TAG = "Ribbon_";
+    private static final String dateFormatString = "dd MMM yyyy";
+    private Reference reference;
+    private String name;
+    private CharSequence lastVisitedText;
+    private Date lastVisited;
+
+    protected Ribbon(Parcel in) {
+        reference = in.readParcelable(Reference.class.getClassLoader());
+        name = in.readString();
+        lastVisited = new Date(in.readLong());
+        lastVisitedText = DateFormat.format(dateFormatString, lastVisited);
+    }
+
+    public Ribbon() {
+        this.reference = new Reference(Reference.getDefault());
+        this.name = null;
+        lastVisited = new Date(0);
+        lastVisitedText = HomeActivity.getContext().getString(R.string.neverVisited);
+    }
+
+    public Ribbon(Reference reference, String name) {
+        this.reference = reference;
+        this.name = name;
+        setLastVisitedToNow();
+    }
+
+    public void setLastVisitedToNow() {
+        lastVisited = new Date(System.currentTimeMillis());
+        lastVisitedText = DateFormat.format(dateFormatString, lastVisited);
+    }
 
     public Date getLastVisited() {
         return lastVisited;
@@ -51,18 +63,13 @@ public class Ribbon implements Parcelable {
         return lastVisitedText;
     }
 
-    public void setLastVisitedToNow() {
-        lastVisited = new Date(System.currentTimeMillis());
-        lastVisitedText = DateFormat.format(dateFormatString, lastVisited);
-    }
-
     @NonNull
     public Translation getTranslation() {
-        return translation;
+        return reference.getTranslation();
     }
 
     public void setTranslation(@NonNull Translation translation) {
-        this.translation = translation;
+        reference.setTranslation(translation);
     }
 
     public Reference getReference() {
@@ -81,24 +88,9 @@ public class Ribbon implements Parcelable {
         this.name = name;
     }
 
-    public Ribbon() {
-        this.translation = Translation.getDefault();
-        this.reference = Reference.getDefault();
-        this.name = null;
-        lastVisited = new Date(0);
-        lastVisitedText = HomeActivity.getContext().getString(R.string.neverVisited);
-    }
-
     @Override
     public String toString() {
-        return "<Ribbon(name: " + name + ", translation: " + translation.toString() + ", reference: " + reference.toString() + ")>";
-    }
-
-    public Ribbon(@NonNull Translation translation, Reference reference, String name) {
-        this.translation = translation;
-        this.reference = reference;
-        this.name = name;
-        setLastVisitedToNow();
+        return "<Ribbon(name: " + name + ", reference: " + reference.toString() + ")>";
     }
 
     @Override
@@ -108,25 +100,40 @@ public class Ribbon implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeParcelable(translation, 0);
         parcel.writeParcelable(reference, 0);
         parcel.writeString(name);
         parcel.writeLong(lastVisited.getTime());
     }
 
     public Book getBook() {
-        return translation.getBook(reference.getBookIndex());
+        return reference.getBook();
     }
 
     public Chapter getChapter() {
-        int bookIndex = reference.getBookIndex();
-        Log.d(TAG, "bookIndex: " + bookIndex);
-        Book book = translation.getBook(bookIndex);
-        Log.d(TAG, "book: " + book);
-        int chapterIndex = reference.getChapter();
-        Log.d(TAG, "chapterIndex: " + chapterIndex);
-        Chapter chapter = book.getChapter(chapterIndex);
-        Log.d(TAG, "chapter: " + chapter);
-        return chapter;
+        return reference.getChapter();
+    }
+
+    public void setPosition(int position) {
+        reference.setPosition(position);
+    }
+
+    public CharSequence getBookName() {
+        return reference.getBookName();
+    }
+
+    public int getChapterIndex() {
+        return reference.getChapterIndex();
+    }
+
+    public int getPosition() {
+        return reference.getPosition();
+    }
+
+    public void setChapterIndex(int chapterIndex) {
+        reference.setChapterIndex(chapterIndex);
+    }
+
+    public void updateIndices(Reference reference) {
+        this.reference.setIndices(reference.getBookIndex(), reference.getChapterIndex());
     }
 }
