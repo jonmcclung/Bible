@@ -83,6 +83,7 @@ public class SelectorFragment extends Fragment implements ReferenceSelectorItemS
         reference.setChapterIndex(chapterIndex);
         if (listener != null) {
             listener.onChapterSelected(chapterIndex);
+            listener.submit();
         }
     }
 
