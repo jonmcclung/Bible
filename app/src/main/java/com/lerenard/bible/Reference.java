@@ -66,6 +66,13 @@ public class Reference implements Parcelable {
         updatePosition();
     }
 
+    public Reference(int position, int verse, Translation translation) {
+        this.position = position;
+        updateIndices();
+        this.verse = verse;
+        this.translation = translation;
+    }
+
     /**
      * updates position from indices
      */
@@ -79,20 +86,15 @@ public class Reference implements Parcelable {
     }
 
     public Reference(Reference reference) {
-        this(reference.bookIndex, reference.chapterIndex, reference.verse, reference.translation);
+        this(reference.position, reference.verse, reference.translation);
     }
 
     public Reference(int bookIndex, int chapterIndex, int verse, Translation translation) {
-        this(chapterIndex, verse, translation);
         this.bookIndex = bookIndex;
-        updatePosition();
-    }
-
-    private Reference(
-            int chapterIndex, int verse, Translation translation) {
         this.chapterIndex = chapterIndex;
         this.verse = verse;
         this.translation = translation;
+        updatePosition();
     }
 
     public Reference(String bookName, int chapterIndex, int verse, Translation translation) {
@@ -114,7 +116,7 @@ public class Reference implements Parcelable {
     }
 
     public static Reference getDefault() {
-        return new Reference("Genesis", 1, 1, Translation.getDefault());
+        return new Reference(0, 1, Translation.getDefault());
     }
 
     public static int getTotalChapterCount() {

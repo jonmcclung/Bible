@@ -13,12 +13,12 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.lerenard.bible.helper.DatabaseHandler;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import co.paulburke.android.itemtouchhelperdemo.helper.SimpleItemTouchHelperCallback;
 
@@ -26,10 +26,12 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 public class HomeActivity extends AppCompatActivity implements DataSetListener<Ribbon> {
 
-    public static final int REQUEST_WRITE_STORAGE = 1;
+    public static final int REQUEST_WRITE_STORAGE = 1, REQUEST_UPDATE_RIBBON = 2;
     private static final String TAG = "HomeActivity_";
+    public static final String INDEX_KEY = "INDEX_KEY";
     private static boolean justAsked = false;
     private static Context context;
+    private RibbonAdapter adapter;
 
     public static Context getContext() {
         return context;
@@ -37,35 +39,52 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
 
     @Override
     public void onAdd(Ribbon ribbon, int index) {
-
+        MainApplication.getDatabase().addRibbon(ribbon, index);
     }
 
     @Override
     public void onDelete(Ribbon ribbon, int position) {
-
+        MainApplication.getDatabase().deleteRibbon(ribbon);
     }
 
     @Override
     public void onUpdate(Ribbon ribbon) {
+        MainApplication.getDatabase().updateRibbon(ribbon);
+    }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            Bundle extras = data.getExtras();
+            switch (requestCode) {
+                case REQUEST_UPDATE_RIBBON:
+                    Ribbon ribbon = extras.getParcelable(ReadingActivity.RIBBON_KEY);
+                    int position = extras.getInt(INDEX_KEY);
+                    adapter.set(position, ribbon, false);
+                    break;
+                default:
+                    throw new IllegalStateException("unexpected requestCode " + requestCode);
+            }
+        }
     }
 
     @Override
     public void onClick(Ribbon ribbon, int position) {
+        ribbon.setLastVisitedToNow();
+        MainApplication.getDatabase().updateRibbon(ribbon);
         Intent intent = new Intent(this, ReadingActivity.class)
-                .putExtra(ReadingActivity.RIBBON_KEY, ribbon);
-        startActivity(intent);
+                .putExtra(ReadingActivity.RIBBON_KEY, ribbon)
+                .putExtra(HomeActivity.INDEX_KEY, position);
+        startActivityForResult(intent, REQUEST_UPDATE_RIBBON);
     }
 
     @Override
     public void onDrag(Ribbon ribbon, int start, int end) {
-
+        MainApplication.getDatabase().moveRibbon(ribbon.getId(), start, end);
     }
 
     @Override
-    public void onLongPress(Ribbon ribbon, int position) {
-
-    }
+    public void onLongPress(Ribbon ribbon, int position) {}
 
     @Override
     public void onRequestPermissionsResult(
@@ -116,22 +135,19 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
                     Snackbar.LENGTH_LONG).show();
         }
 
-
-        ArrayList<Ribbon> ribbons = new ArrayList<>();
-        ribbons.add(new Ribbon());
-        ribbons.add(new Ribbon(new Reference("1 John", 1, 1, NIV), "something else"));
-        ribbons.add(new Ribbon(new Reference("Mark", 1, 1, NIV), "personal reading"));
-
-        RibbonAdapter adapter = null;
-
+        adapter = null;
         try {
             adapter = new RibbonAdapter(
                     getApplicationContext(),
-                    ribbons, this,
+                    MainApplication.getDatabase().getAllRibbons(), this,
                     ContextCompat.getColor(getApplicationContext(), R.color.defaultItemColor),
                     ContextCompat.getColor(getApplicationContext(), R.color.highlightColor));
         } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+
+        if (adapter.getItemCount() == 0) {
+            adapter.add(new Ribbon(), true);
         }
 
         RecyclerView ribbonList = (RecyclerView) findViewById(R.id.ribbonList);

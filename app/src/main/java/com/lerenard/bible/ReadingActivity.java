@@ -1,12 +1,16 @@
 package com.lerenard.bible;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ScrollView;
 import android.widget.TextView;
+
+import com.lerenard.bible.helper.DatabaseHandler;
 
 import java.util.Locale;
 
@@ -22,6 +26,7 @@ public class ReadingActivity extends AppCompatActivity {
     private ScrollView scrollView;
     private Ribbon ribbon;
     private TextView translationNameView;
+    private int index;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -40,6 +45,16 @@ public class ReadingActivity extends AppCompatActivity {
         }
     }
 
+    private void updateInfoToolbar() {
+        currentPosition = pager.getCurrentItem();
+        ribbon.setPosition(currentPosition);
+
+        bookNameView.setText(ribbon.getBookName());
+        chapterNameView.setText(
+                String.format(Locale.getDefault(), "%d", ribbon.getChapterIndex()));
+        translationNameView.setText(ribbon.getTranslation().getName());
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +63,12 @@ public class ReadingActivity extends AppCompatActivity {
         Bundle savedState =
                 (savedInstanceState == null ? getIntent().getExtras() : savedInstanceState);
         ribbon = savedState.getParcelable(RIBBON_KEY);
+        if (savedState.containsKey(HomeActivity.INDEX_KEY)) {
+            index = savedState.getInt(HomeActivity.INDEX_KEY);
+        }
+        else {
+            index = -1;
+        }
         currentPosition = ribbon.getPosition();
 
         scrollView = (ScrollView) findViewById(R.id.scrollView);
@@ -90,19 +111,41 @@ public class ReadingActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "stopping");
+
+        final DatabaseHandler db = MainApplication.getDatabase();
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                /*if (!alreadyAdded) {
+                    db.addCount(count);
+                    alreadyAdded = true;
+                }*/
+                db.updateRibbon(ribbon);
+                return null;
+            }
+        }.execute();
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent data = new Intent();
+        data.putExtra(RIBBON_KEY, ribbon);
+        if (index != -1) {
+            data.putExtra(HomeActivity.INDEX_KEY, index);
+        }
+        setResult(RESULT_OK, data);
+        finish();
+    }
+
+    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelable(RIBBON_KEY, ribbon);
-    }
-
-    private void updateInfoToolbar() {
-        currentPosition = pager.getCurrentItem();
-        ribbon.setPosition(currentPosition);
-
-        bookNameView.setText(ribbon.getBookName());
-        chapterNameView.setText(
-                String.format(Locale.getDefault(), "%d", ribbon.getChapterIndex()));
-        translationNameView.setText(ribbon.getTranslation().getName());
+        outState.putInt(HomeActivity.INDEX_KEY, index);
     }
 
     class StartSelectorFragmentListener implements View.OnClickListener {
