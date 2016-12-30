@@ -70,20 +70,12 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
     @Override
     public void onRequestPermissionsResult(
             int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        Log.d(
-                TAG,
-                "acquired result of permission request. Code: " + requestCode + ", permissions: " +
-                Arrays
-                        .toString(permissions) + ", grantResults: " +
-                Arrays.toString(grantResults));
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case REQUEST_WRITE_STORAGE:
                 if (grantResults.length > 0 && grantResults[0] == PERMISSION_GRANTED) {
-                    Log.d(TAG, "permission granted, recreating");
                 }
                 else {
-                    Log.d(TAG, "permission denied");
                     Snackbar snackbar = Snackbar.make(
                             findViewById(R.id.activity_home),
                             getString(R.string.grant_permission),
@@ -127,7 +119,6 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
 
         ArrayList<Ribbon> ribbons = new ArrayList<>();
         ribbons.add(new Ribbon());
-        Log.d(TAG, "translation: " + ribbons.get(0).getTranslation() + ", default translation: " + Translation.getDefault());
         ribbons.add(new Ribbon(new Reference("1 John", 1, 1, NIV), "something else"));
         ribbons.add(new Ribbon(new Reference("Mark", 1, 1, NIV), "personal reading"));
 
@@ -139,7 +130,6 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
                     ribbons, this,
                     ContextCompat.getColor(getApplicationContext(), R.color.defaultItemColor),
                     ContextCompat.getColor(getApplicationContext(), R.color.highlightColor));
-            Log.d(TAG, "Successfully created adapter");
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }

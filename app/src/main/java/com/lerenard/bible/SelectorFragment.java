@@ -51,10 +51,6 @@ public class SelectorFragment extends Fragment implements ReferenceSelectorItemS
             @Nullable Bundle savedInstanceState) {
         if (savedInstanceState != null) {
             restoreArguments(savedInstanceState);
-            Log.d(TAG, "I am " + this + " with savedInstanceState");
-        }
-        else {
-            Log.d(TAG, "I am " + this + " without savedInstanceState");
         }
 
 
@@ -71,7 +67,6 @@ public class SelectorFragment extends Fragment implements ReferenceSelectorItemS
         pager = (ViewPager) rootView.findViewById(R.id.reference_selector_pager);
 
         adapter = new SelectorAdapter(getFragmentManager(), reference);
-        Log.d(TAG, "setting adapter listener to " + listener);
         adapter.setListener(this);
         pager.setAdapter(adapter);
         pager.setCurrentItem(selectorPosition.ordinal());
@@ -91,12 +86,10 @@ public class SelectorFragment extends Fragment implements ReferenceSelectorItemS
 
     public void setListener(ReferenceSelectorItemSelectedListener listener) {
         this.listener = listener;
-        Log.d(TAG, "listener is now " + listener + ", I am " + this);
     }
 
     @Override
     public void onChapterSelected(int chapterIndex) {
-        Log.d(TAG, "chapterSelected, listener is " + listener);
         reference.setChapterIndex(chapterIndex);
         if (listener != null) {
             listener.onChapterSelected(chapterIndex);
@@ -106,7 +99,6 @@ public class SelectorFragment extends Fragment implements ReferenceSelectorItemS
 
     @Override
     public void onBookSelected(int bookIndex) {
-        Log.d(TAG, "bookSelected, listener is " + listener);
         reference.setBookIndex(bookIndex);
         adapter.updateChapters(reference);
         if (listener != null) {
@@ -119,9 +111,6 @@ public class SelectorFragment extends Fragment implements ReferenceSelectorItemS
     public void submit() {
         if (listener != null) {
             listener.submit();
-        }
-        else {
-            Log.d(TAG, "listener is null, I am " + this);
         }
     }
 

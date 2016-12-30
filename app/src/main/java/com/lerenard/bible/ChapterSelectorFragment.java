@@ -43,7 +43,6 @@ public class ChapterSelectorFragment extends SelectorFragmentTab {
 
         adapter = new ChapterSelectorAdapter(Book.getChapterCount(reference.getBookIndex()),
                                              reference.getChapterIndex(), getContext());
-        Log.d(TAG, "setting adapter's listener to " + listener);
         adapter.setListener(listener);
         recyclerView.setAdapter(adapter);
         recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(
@@ -70,7 +69,6 @@ public class ChapterSelectorFragment extends SelectorFragmentTab {
 
     @Override
     public void setListener(ReferenceSelectorItemSelectedListener listener) {
-        Log.d(TAG, "setting listener, adapter is " + adapter);
         super.setListener(listener);
         if (adapter != null) {
             adapter.setListener(listener);

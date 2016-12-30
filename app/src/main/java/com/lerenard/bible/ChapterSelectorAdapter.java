@@ -100,11 +100,9 @@ public class ChapterSelectorAdapter
                             "here.");
                 }
             }
-            Log.d(TAG, "inserted " + (chapterCount - oldChapterCount) + " starting from " + oldChapterCount);
             notifyItemRangeInserted(oldChapterCount, chapterCount - oldChapterCount);
         }
         else {
-            Log.d(TAG, "removed " + (oldChapterCount - chapterCount) + " starting from " + chapterCount);
             notifyItemRangeRemoved(chapterCount, oldChapterCount - chapterCount);
         }
     }

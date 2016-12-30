@@ -34,7 +34,6 @@ public class FileAccess {
             isPresent = res.mkdirs();
         }
         if (isPresent) {
-            Log.d(TAG, "successfully created " + res.toString());
             return res;
         }
         else {

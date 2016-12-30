@@ -41,8 +41,6 @@ public class RecyclerAdapter<T, VH extends RecyclerViewHolder<T>>
         this.supplier = supplier;
         this.selectedColor = selectedColor;
         this.unselectedColor = unselectedColor;
-        Log.d(TAG, "selected: " + Integer.toHexString(selectedColor) + "; unselected: " +
-                   Integer.toHexString(unselectedColor));
     }
 
     @Override

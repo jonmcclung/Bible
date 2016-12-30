@@ -27,7 +27,7 @@ public class BookSelectorFragment extends SelectorFragmentTab {
             LayoutInflater inflater,
             @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState) {
-        
+
         if (savedInstanceState != null) {
             restoreArguments(savedInstanceState);
         }
@@ -46,7 +46,6 @@ public class BookSelectorFragment extends SelectorFragmentTab {
 
         adapter = new BookSelectorAdapter(reference.getTranslation(),
                                           reference.getBookIndex(), getContext());
-        Log.d(TAG, "setting adapter's listener to " + listener);
         adapter.setListener(listener);
         recyclerView.setAdapter(adapter);
         recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(
@@ -79,7 +78,6 @@ public class BookSelectorFragment extends SelectorFragmentTab {
     @Override
     public void setListener(ReferenceSelectorItemSelectedListener listener) {
         super.setListener(listener);
-        Log.d(TAG, "setting listener, adapter is " + adapter);
         if (adapter != null) {
             adapter.setListener(listener);
         }

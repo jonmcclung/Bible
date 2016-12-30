@@ -82,7 +82,6 @@ public class SelectorAdapter extends FragmentPagerAdapter {
 
     public void setListener(ReferenceSelectorItemSelectedListener listener) {
         this.listener = listener;
-        Log.d(TAG, "setting listeners of fragment tabs to " + listener);
         if (bookSelectorFragment != null) {
             bookSelectorFragment.setListener(listener);
         }
