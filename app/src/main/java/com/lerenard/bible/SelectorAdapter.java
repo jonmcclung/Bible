@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.util.Log;
+import android.view.ViewGroup;
 
 import static com.lerenard.bible.SelectorFragment.REFERENCE_KEY;
 
@@ -12,30 +14,52 @@ import static com.lerenard.bible.SelectorFragment.REFERENCE_KEY;
  */
 
 public class SelectorAdapter extends FragmentPagerAdapter {
-    private final BookSelectorFragment bookSelectorFragment;
-    private final ChapterSelectorFragment chapterSelectorFragment;
+    private static final String TAG = "SelectorAdapter_";
+    private BookSelectorFragment bookSelectorFragment;
+    private ChapterSelectorFragment chapterSelectorFragment;
+    private final Bundle args;
+    private ReferenceSelectorItemSelectedListener listener;
 
 
     public SelectorAdapter(FragmentManager fm, Reference reference) {
         super(fm);
-        Bundle args = new Bundle();
+        args = new Bundle();
         args.putParcelable(REFERENCE_KEY, reference);
-        bookSelectorFragment = new BookSelectorFragment();
-        chapterSelectorFragment = new ChapterSelectorFragment();
-        bookSelectorFragment.setArguments(args);
-        chapterSelectorFragment.setArguments(args);
     }
 
     @Override
     public Fragment getItem(int position) {
+        SelectorFragmentTab fragment;
         switch (SelectorPosition.values()[position]) {
             case BOOK_POSITION:
-                return bookSelectorFragment;
+                fragment = new BookSelectorFragment();
+                break;
             case CHAPTER_POSITION:
-                return chapterSelectorFragment;
+                fragment = new ChapterSelectorFragment();
+                break;
             default:
                 throw new IllegalStateException("unexpected position: " + position);
         }
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
+    public Object instantiateItem(ViewGroup container, int position) {
+        SelectorFragmentTab fragment = (SelectorFragmentTab) super.instantiateItem(container, position);
+        switch (SelectorPosition.values()[position]) {
+            case BOOK_POSITION:
+                bookSelectorFragment = (BookSelectorFragment) fragment;
+                break;
+            case CHAPTER_POSITION:
+                chapterSelectorFragment =
+                        (ChapterSelectorFragment) fragment;
+                break;
+            default:
+                throw new IllegalStateException("unexpected position: " + position);
+        }
+        fragment.setListener(listener);
+        return fragment;
     }
 
     @Override
@@ -57,7 +81,17 @@ public class SelectorAdapter extends FragmentPagerAdapter {
     }
 
     public void setListener(ReferenceSelectorItemSelectedListener listener) {
-        bookSelectorFragment.setListener(listener);
-        chapterSelectorFragment.setListener(listener);
+        this.listener = listener;
+        Log.d(TAG, "setting listeners of fragment tabs to " + listener);
+        if (bookSelectorFragment != null) {
+            bookSelectorFragment.setListener(listener);
+        }
+        if (chapterSelectorFragment != null) {
+            chapterSelectorFragment.setListener(listener);
+        }
+    }
+
+    public void updateChapters(Reference reference) {
+        chapterSelectorFragment.updateReference(reference);
     }
 }

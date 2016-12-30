@@ -26,17 +26,22 @@ public class Book implements Parcelable {
             66, 52, 5, 48, 12, 14, 3, 9, 1, 4, 7, 3, 3, 3, 2, 14, 4, 28, 16, 24, 21, 28, 16, 16, 13,
             6, 6, 4, 4, 5, 3, 6, 4, 3, 1, 13, 5, 5, 3, 5, 1, 1, 1, 22};
     private ArrayList<Chapter> chapters;
-    private String name;
+    private int index;
 
     public Book() {}
 
     protected Book(Parcel in) {
         chapters = in.createTypedArrayList(Chapter.CREATOR);
-        name = in.readString();
+        index = in.readInt();
+    }
+
+    public Book(int index, ArrayList<Chapter> chapters) {
+        this.index = index;
+        this.chapters = chapters;
     }
 
     public Book(String name, ArrayList<Chapter> chapters) {
-        this.name = name;
+        this.index = indexFromName(name);
         this.chapters = chapters;
     }
 
@@ -46,7 +51,7 @@ public class Book implements Parcelable {
 
     @Override
     public String toString() {
-        return "<Book(name: " + name + " chapters: " + chapters.size() + ")>";
+        return "<Book(name: " + getName() + " chapters: " + chapters.size() + ")>";
     }
 
     public ArrayList<Chapter> getChapters() {
@@ -58,7 +63,11 @@ public class Book implements Parcelable {
     }
 
     public String getName() {
-        return name;
+        return Reference.allBooks.get(index);
+    }
+
+    public String getAbbreviation() {
+        return Reference.abbreviations.get(index);
     }
 
     /**
@@ -85,6 +94,18 @@ public class Book implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeTypedList(chapters);
-        parcel.writeString(name);
+        parcel.writeInt(index);
+    }
+
+    public static int indexFromName(String bookName) {
+        int index = Reference.allBooks.indexOf(bookName);
+        if (index == -1) {
+            index = Reference.abbreviations.indexOf(bookName);
+            if (index == -1) {
+                throw new IllegalArgumentException(
+                        "I can't find a bookName with the name " + bookName);
+            }
+        }
+        return index;
     }
 }

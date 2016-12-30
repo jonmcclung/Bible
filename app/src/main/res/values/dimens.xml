@@ -12,6 +12,10 @@
     <dimen name="activity_reading_end_padding">128dp</dimen>
     <dimen name="activity_reading_reference_info_view_textSize">24sp</dimen>
     <dimen name="activity_reading_toolbar_height">64dp</dimen>
-    <dimen name="chapter_selector_diameter">64dp</dimen>
+    <dimen name="chapter_selector_diameter">54dp</dimen>
     <dimen name="chapter_selector_margin">4dp</dimen>
+    <dimen name="book_selector_margin">@dimen/chapter_selector_margin</dimen>
+    <dimen name="book_selector_button_height">42dp</dimen>
+    <dimen name="book_selector_button_width">80dp</dimen>
+    <dimen name="book_selector_button_corner_radius">21dp</dimen>
 </resources>

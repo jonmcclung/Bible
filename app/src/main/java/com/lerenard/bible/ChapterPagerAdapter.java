@@ -31,14 +31,14 @@ public class ChapterPagerAdapter extends FragmentStatePagerAdapter {
     public Fragment getItem(int position) {
         Reference newReference = new Reference(ribbon.getReference());
         newReference.setPosition(position);
-        Log.d(
+        /*Log.d(
                 TAG, "position: " + position + ", newReference: " + newReference + ", ribbon: " +
-                     ribbon);
+                     ribbon);*/
         ChapterFragment res = new ChapterFragment();
         map.put(position, res);
         Bundle args = new Bundle();
         Ribbon toPass = new Ribbon(newReference, ribbon.getName());
-        Log.d(TAG, "modified ribbon is " + toPass);
+//        Log.d(TAG, "modified ribbon is " + toPass);
         args.putParcelable(ReadingActivity.RIBBON_KEY, toPass);
         res.setArguments(args);
         return res;

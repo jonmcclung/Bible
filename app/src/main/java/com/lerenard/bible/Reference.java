@@ -97,14 +97,7 @@ public class Reference implements Parcelable {
 
     public Reference(String bookName, int chapterIndex, int verse, Translation translation) {
         this(chapterIndex, verse, translation);
-        bookIndex = allBooks.indexOf(bookName);
-        if (bookIndex == -1) {
-            bookIndex = abbreviations.indexOf(bookName);
-            if (bookIndex == -1) {
-                throw new IllegalArgumentException(
-                        "I can't find a bookName with the name " + bookName);
-            }
-        }
+        bookIndex = Book.indexFromName(bookName);
         updatePosition();
     }
 /*

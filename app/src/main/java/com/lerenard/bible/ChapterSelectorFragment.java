@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import android.view.ViewTreeObserver;
 public class ChapterSelectorFragment extends SelectorFragmentTab {
 
     private static final String TAG = "ChapterSelectorFrag_";
+    private ChapterSelectorAdapter adapter;
 
     @Nullable
     @Override
@@ -38,11 +40,11 @@ public class ChapterSelectorFragment extends SelectorFragmentTab {
 
         final GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 1);
         recyclerView.setLayoutManager(layoutManager);
-        recyclerView.addItemDecoration(new RecyclerViewItemDecorator(0));
 
-        ChapterSelectorAdapter adapter =
-                new ChapterSelectorAdapter(Book.getChapterCount(reference.getBookIndex()),
-                                           reference.getChapterIndex(), getContext(), this);
+        adapter = new ChapterSelectorAdapter(Book.getChapterCount(reference.getBookIndex()),
+                                             reference.getChapterIndex(), getContext());
+        Log.d(TAG, "setting adapter's listener to " + listener);
+        adapter.setListener(listener);
         recyclerView.setAdapter(adapter);
         recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(
                 new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -50,6 +52,7 @@ public class ChapterSelectorFragment extends SelectorFragmentTab {
                     @Override
                     public void onGlobalLayout() {
                         int usableWidth = rootView.getWidth();
+                        int bw = recyclerView.getWidth() / layoutManager.getSpanCount();
                         int buttonWidth =
                                 (int) (chapterSelectorDiameter + (chapterSelectorMargin * 2));
                         int spanCount = usableWidth / buttonWidth;
@@ -63,5 +66,18 @@ public class ChapterSelectorFragment extends SelectorFragmentTab {
                     }
                 });
         return rootView;
+    }
+
+    @Override
+    public void setListener(ReferenceSelectorItemSelectedListener listener) {
+        Log.d(TAG, "setting listener, adapter is " + adapter);
+        super.setListener(listener);
+        if (adapter != null) {
+            adapter.setListener(listener);
+        }
+    }
+
+    public void updateReference(Reference reference) {
+        adapter.setChapters(reference.getBook().getChapterCount(), reference.getChapterIndex());
     }
 }

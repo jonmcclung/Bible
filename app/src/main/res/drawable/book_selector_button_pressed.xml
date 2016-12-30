@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="rectangle">
+    <solid android:color="@color/highlightColor"/>
+
+    <size
+        android:width="@dimen/book_selector_button_width"
+        android:height="@dimen/book_selector_button_height"/>
+
+    <corners
+        android:bottomLeftRadius="@dimen/book_selector_button_corner_radius"
+        android:bottomRightRadius="@dimen/book_selector_button_corner_radius"
+        android:topLeftRadius="@dimen/book_selector_button_corner_radius"
+        android:topRightRadius="@dimen/book_selector_button_corner_radius"/>
+</shape>
