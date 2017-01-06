@@ -3,6 +3,7 @@ package com.lerenard.bible;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -35,6 +36,7 @@ public class Translation implements Parcelable {
     private static final String TAG = "Translation_";
     private static Translation defaultTranslation = null;
     private static HashMap<String, Translation> allTranslations = new HashMap<>();
+    private static String[] allTranslationNames = {"ESV", "NIV", "MSG", "NLT"};
     private List<Book> books;
     private String name;
 
@@ -62,19 +64,33 @@ public class Translation implements Parcelable {
         this.name = name;
     }
 
-    public static Translation getDefault() {
-        return defaultTranslation;
+    public static ArrayList<Translation> getAllTranslations(Context context) {
+        loadAll(context);
+        return getAllTranslations();
     }
 
-    public static void setDefault(Translation defaultTranslation) {
-        Translation.defaultTranslation = defaultTranslation;
+    public static void loadAll(Context context) {
+        for (String translationName : allTranslationNames) {
+            get(context, translationName);
+        }
+    }
+
+    public static ArrayList<Translation> getAllTranslations() {
+        ArrayList<Translation> res = new ArrayList<>(allTranslations.size());
+        for (Translation translation : allTranslations.values()) {
+            res.add(translation);
+        }
+        return res;
     }
 
     public static Translation get(Context context, String name) {
-        if (!allTranslations.containsKey(name)) {
+        if (!allTranslations.containsKey(name) || allTranslations.get(name) == null) {
             final Translation res =
                     loadTranslation(context, "bibles/" + name + "/" + name + ".json", name);
             allTranslations.put(name, res);
+            if (res == null) {
+                Log.d(TAG, "unable to load " + name);
+            }
             return res;
         }
         else {
@@ -90,6 +106,7 @@ public class Translation implements Parcelable {
             file.close();
             return translation;
         } catch (IOException e) {
+            Log.d(TAG, e.toString());
             return null;
         }
     }
@@ -99,7 +116,8 @@ public class Translation implements Parcelable {
         Translation res = new Translation(name);
         ObjectMapper mapper = new ObjectMapper();
         TypeReference<JsonNode> typeReference =
-                new TypeReference<JsonNode>() {};
+                new TypeReference<JsonNode>() {
+                };
         JsonNode map = mapper.readValue(stream, typeReference);
 
         List<String> bookNames = Reference.allBooks;
@@ -131,14 +149,20 @@ public class Translation implements Parcelable {
                 int numVerses = verseList.size();
                 ArrayList<Verse> verses = new ArrayList<>(numVerses);
                 for (int i = 0; i < numVerses; ++i) {
-                    verses.add(null);
+                    verses.add(new Verse(""));
                 }
-                chapters.get(Integer.parseInt(chapterField.getKey()) - 1).setVerses(verses);
+                int chapterIndex = Integer.parseInt(chapterField.getKey()) - 1;
+                chapters.get(chapterIndex).setVerses(verses);
                 final Iterator<Map.Entry<String, JsonNode>> verseFields = verseList.fields();
                 while (verseFields.hasNext()) {
                     Map.Entry<String, JsonNode> verseField = verseFields.next();
+                    int verseNumber = Integer.parseInt(verseField.getKey()) - 1;
+                    while (verses.size() <= verseNumber) {
+                        Log.d(TAG, name + " " + bookName + " " + (chapterIndex + 1) + " needed more verses");
+                        verses.add(new Verse(""));
+                    }
                     verses.set(
-                            Integer.parseInt(verseField.getKey()) - 1,
+                            verseNumber,
                             new Verse(verseField.getValue().asText()));
                 }
             }
@@ -149,6 +173,19 @@ public class Translation implements Parcelable {
 
     public static void add(Translation translation) {
         allTranslations.put(translation.name, translation);
+    }
+
+    public static Translation getDefault() {
+        return defaultTranslation;
+    }
+
+    public static void setDefault(Translation defaultTranslation) {
+        Translation.defaultTranslation = defaultTranslation;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + ", name: " + name;
     }
 
     public List<Book> getBooks() {

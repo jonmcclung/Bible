@@ -8,7 +8,6 @@ import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.lerenard.bible.helper.DatabaseHandler;
@@ -19,7 +18,7 @@ public class ReadingActivity extends AppCompatActivity {
     public static final String RIBBON_KEY = "RIBBON_KEY", CURRENT_POSITION_KEY =
             "CURRENT_POSITION_KEY";
     private static final String TAG = "ReadingActivity_";
-    private static final int SELECT_REFERENCE_CODE = 1;
+    private static final int SELECT_REFERENCE_CODE = 1, SELECT_TRANSLATION_CODE = 2;
     private int currentPosition = -1;
     private TextView bookNameView;
     private TextView chapterNameView;
@@ -28,6 +27,7 @@ public class ReadingActivity extends AppCompatActivity {
     private Ribbon ribbon;
     private TextView translationNameView;
     private int index;
+    private ChapterPagerAdapter adapter;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -39,6 +39,13 @@ public class ReadingActivity extends AppCompatActivity {
                     ribbon.updateIndices(reference);
                     pager.setCurrentItem(ribbon.getPosition());
                     updateInfoToolbar();
+                    break;
+                case SELECT_TRANSLATION_CODE:
+                    Translation translation = data.getExtras().getParcelable(
+                            TranslationSelectorActivity.TRANSLATION_KEY);
+                    ribbon.setTranslation(translation);
+                    updateInfoToolbar();
+                    adapter.setTranslation(translation);
                     break;
                 default:
                     throw new IllegalStateException("unexpected requestCode: " + requestCode);
@@ -54,6 +61,17 @@ public class ReadingActivity extends AppCompatActivity {
         chapterNameView.setText(
                 String.format(Locale.getDefault(), "%d", ribbon.getChapterIndex()));
         translationNameView.setText(ribbon.getTranslation().getName());
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent data = new Intent();
+        data.putExtra(RIBBON_KEY, ribbon);
+        if (index != -1) {
+            data.putExtra(HomeActivity.INDEX_KEY, index);
+        }
+        setResult(RESULT_OK, data);
+        finish();
     }
 
     @Override
@@ -84,8 +102,16 @@ public class ReadingActivity extends AppCompatActivity {
 
         translationNameView = (TextView) findViewById(R.id.translation_name_view);
         translationNameView.setText(ribbon.getTranslation().getName());
+        translationNameView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent =
+                        new Intent(getApplicationContext(), TranslationSelectorActivity.class);
+                startActivityForResult(intent, SELECT_TRANSLATION_CODE);
+            }
+        });
 
-        ChapterPagerAdapter adapter = new ChapterPagerAdapter(ribbon, getSupportFragmentManager());
+        adapter = new ChapterPagerAdapter(ribbon, getSupportFragmentManager());
 
         pager = (ViewPager) findViewById(R.id.chapter_pager);
         pager.setAdapter(adapter);
@@ -129,17 +155,6 @@ public class ReadingActivity extends AppCompatActivity {
                 return null;
             }
         }.execute();
-    }
-
-    @Override
-    public void onBackPressed() {
-        Intent data = new Intent();
-        data.putExtra(RIBBON_KEY, ribbon);
-        if (index != -1) {
-            data.putExtra(HomeActivity.INDEX_KEY, index);
-        }
-        setResult(RESULT_OK, data);
-        finish();
     }
 
     @Override

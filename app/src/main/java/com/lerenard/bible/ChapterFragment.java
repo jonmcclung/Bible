@@ -50,6 +50,10 @@ public class ChapterFragment extends Fragment {
         return root;
     }
 
+    public void setTranslation(Translation translation) {
+        ribbon.setTranslation(translation);
+    }
+
     private SpannableStringBuilder getChapterText(Chapter chapter) {
         ArrayList<Verse> verses = chapter.getVerses();
         SpannableStringBuilder builder = new SpannableStringBuilder();

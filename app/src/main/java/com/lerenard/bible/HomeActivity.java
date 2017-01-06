@@ -198,11 +198,6 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
             throw new RuntimeException(e);
         }
 
-        if (adapter.getItemCount() == 0) {
-            // TODO
-            adapter.add(new Ribbon(), true);
-        }
-
         RecyclerView ribbonList = (RecyclerView) findViewById(R.id.ribbonList);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(

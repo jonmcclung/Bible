@@ -51,12 +51,21 @@ public class ChapterPagerAdapter extends FragmentStatePagerAdapter {
         map.remove(position);
     }
 
-    public ChapterFragment getFragment(int position) {
-        return map.get(position);
-    }
-
     @Override
     public int getCount() {
         return Reference.getTotalChapterCount();
+    }
+
+    @Override
+    public int getItemPosition(Object object) {
+        return POSITION_NONE;
+    }
+
+    public void setTranslation(Translation translation) {
+        ribbon.setTranslation(translation);
+        for (int i = 0; i < map.size(); ++i) {
+            map.get(map.keyAt(i)).setTranslation(translation);
+        }
+        notifyDataSetChanged();
     }
 }
