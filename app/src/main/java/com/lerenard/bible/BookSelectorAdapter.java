@@ -23,7 +23,6 @@ public class BookSelectorAdapter extends RecyclerView.Adapter<BookSelectorAdapte
     private ReferenceSelectorItemSelectedListener listener;
     private View activeView;
     private int currentSelection;
-
     public BookSelectorAdapter(
             Translation translation, int initialPosition, Context context) {
         this.translation = translation;
@@ -41,6 +40,10 @@ public class BookSelectorAdapter extends RecyclerView.Adapter<BookSelectorAdapte
                 context,
                 R.drawable
                         .book_selector_button_pressed);
+    }
+
+    public View getActiveView() {
+        return activeView;
     }
 
     @Override

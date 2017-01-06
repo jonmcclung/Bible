@@ -60,6 +60,11 @@ public class ChapterSelectorFragment extends SelectorFragmentTab {
                         final ViewGroup.MarginLayoutParams params =
                                 (ViewGroup.MarginLayoutParams) recyclerView.getLayoutParams();
                         params.leftMargin = extra / 2;
+
+                        layoutManager.scrollToPositionWithOffset(
+                                reference.getChapterIndex() - 1,
+                                layoutManager.getHeight() / 2);
+
                         recyclerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                         recyclerView.requestLayout();
                     }
