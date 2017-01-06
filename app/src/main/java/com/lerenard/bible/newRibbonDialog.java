@@ -39,9 +39,6 @@ public class NewRibbonDialog extends DialogFragment {
                 container,
                 false);
 
-        // seems to have no effect...
-        getDialog().setTitle(getResources().getString(R.string.start_new_ribbon_dialog_title));
-
         LinearLayout ribbonNameOptions =
                 (LinearLayout) dialogView.findViewById(R.id.ribbon_name_options);
 

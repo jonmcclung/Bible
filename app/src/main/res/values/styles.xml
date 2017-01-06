@@ -1,4 +1,5 @@
-<resources>
+<resources
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -15,6 +16,7 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="colorControlHighlight">@color/ripple</item>
     </style>
+
     <style name="ribbonViewText" parent="@android:style/TextAppearance.Widget.TextView">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
@@ -46,15 +48,32 @@
            parent="TextAppearance.AppCompat.Widget.TextView.SpinnerItem">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:paddingLeft">@dimen/activity_reading_reference_info_view_padding_side</item>
-        <item name="android:paddingStart">@dimen/activity_reading_reference_info_view_padding_side</item>
-        <item name="android:paddingEnd">@dimen/activity_reading_reference_info_view_padding_side</item>
-        <item name="android:paddingRight">@dimen/activity_reading_reference_info_view_padding_side</item>
+        <item name="android:paddingLeft">@dimen/activity_reading_reference_info_view_padding_side
+        </item>
+        <item name="android:paddingStart">@dimen/activity_reading_reference_info_view_padding_side
+        </item>
+        <item name="android:paddingEnd">@dimen/activity_reading_reference_info_view_padding_side
+        </item>
+        <item name="android:paddingRight">@dimen/activity_reading_reference_info_view_padding_side
+        </item>
         <item name="android:textColor">@android:color/white</item>
         <item name="android:background">@drawable/rounded_info_view_button_background</item>
         <item name="android:foreground">?attr/selectableItemBackground</item>
         <item name="android:clickable">true</item>
         <item name="android:textSize">@dimen/activity_reading_reference_info_view_textSize</item>
+    </style>
+
+    <style name="go_button_style">
+        <item name="android:text">@string/submit_reference_selector</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_margin">8dp</item>
+        <item name="android:elevation">4dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:textSize">64sp</item>
+        <item name="android:foreground">?attr/selectableItemBackground</item>
+        <item name="android:background">@drawable/rounded_go_button_background</item>
+        <item name="android:textColor">@android:color/white</item>
     </style>
 
     <style name="tabTextAppearance">
