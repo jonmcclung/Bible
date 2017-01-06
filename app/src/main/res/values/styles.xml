@@ -15,7 +15,7 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="colorControlHighlight">@color/ripple</item>
     </style>
-    <style name="ribbonViewText" parent="Widget.AppCompat.TextView.SpinnerItem">
+    <style name="ribbonViewText" parent="@android:style/TextAppearance.Widget.TextView">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textColor">@color/ribbonViewTextColor</item>
@@ -46,7 +46,10 @@
            parent="TextAppearance.AppCompat.Widget.TextView.SpinnerItem">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:padding">8dp</item>
+        <item name="android:paddingLeft">@dimen/activity_reading_reference_info_view_padding_side</item>
+        <item name="android:paddingStart">@dimen/activity_reading_reference_info_view_padding_side</item>
+        <item name="android:paddingEnd">@dimen/activity_reading_reference_info_view_padding_side</item>
+        <item name="android:paddingRight">@dimen/activity_reading_reference_info_view_padding_side</item>
         <item name="android:textColor">@android:color/white</item>
         <item name="android:background">@drawable/rounded_info_view_button_background</item>
         <item name="android:foreground">?attr/selectableItemBackground</item>
@@ -56,6 +59,17 @@
 
     <style name="tabTextAppearance">
         <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="ribbon_name_option_style" parent="@android:style/TextAppearance.Widget.TextView">
+        <item name="android:background">@color/backgroundDark</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">@dimen/ribbonNameOptionTextSize</item>
+        <item name="android:paddingLeft">4dp</item>
+        <item name="android:paddingStart">4dp</item>
+        <item name="android:elevation">2dp</item>
+        <item name="android:layout_marginTop">3dp</item>
+        <item name="android:layout_marginBottom">3dp</item>
     </style>
 
 </resources>

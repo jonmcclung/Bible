@@ -44,6 +44,10 @@ public class Ribbon implements Parcelable {
         setLastVisited(lastVisited);
     }
 
+    public Ribbon(Reference reference, String name) {
+        this(-1, reference, name, new Date(System.currentTimeMillis()));
+    }
+
     public Date getLastVisited() {
         return lastVisited;
     }

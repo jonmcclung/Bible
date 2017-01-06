@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background"
+    android:padding="@dimen/new_ribbon_dialog_padding">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/start_new_ribbon_dialog_title"
+        android:textSize="@dimen/new_ribbon_dialog_title_text_size"
+        android:textColor="@color/new_ribbon_dialog_title_text_color"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/choose_name_for_ribbon_explanation"
+        android:textSize="@dimen/new_ribbon_dialog_text_size"
+        android:textColor="@color/new_ribbon_dialog_text_color"/>
+
+    <EditText
+        android:id="@+id/custom_ribbon_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:imeOptions="actionGo"
+        android:inputType="textAutoCorrect"
+        android:hint="@string/custom_ribbon_name_hint"
+        android:textSize="@dimen/new_ribbon_dialog_text_size"
+        android:textColor="@color/new_ribbon_dialog_text_color"
+        android:maxLines="1"/>
+
+    <LinearLayout
+        android:id="@+id/ribbon_name_options"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+    </LinearLayout>
+
+</LinearLayout>

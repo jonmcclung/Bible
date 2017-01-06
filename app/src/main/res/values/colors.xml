@@ -14,4 +14,6 @@
     <color name="backgroundDark">@color/colorPrimary</color>
     <color name="ribbonViewTextColor">@android:color/white</color>
     <color name="referenceSelectorTextColor">@android:color/white</color>
+    <color name="new_ribbon_dialog_text_color">@color/colorPrimary</color>
+    <color name="new_ribbon_dialog_title_text_color">@color/colorPrimaryDark</color>
 </resources>

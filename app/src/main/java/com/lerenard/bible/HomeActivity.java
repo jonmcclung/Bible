@@ -3,10 +3,13 @@ package com.lerenard.bible;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
@@ -16,19 +19,19 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 import android.widget.TextView;
 
-import com.lerenard.bible.helper.DatabaseHandler;
-
-import java.util.ArrayList;
-
 import co.paulburke.android.itemtouchhelperdemo.helper.SimpleItemTouchHelperCallback;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
-public class HomeActivity extends AppCompatActivity implements DataSetListener<Ribbon> {
+public class HomeActivity extends AppCompatActivity implements DataSetListener<Ribbon>,
+                                                               RibbonNameListener {
 
-    public static final int REQUEST_WRITE_STORAGE = 1, REQUEST_UPDATE_RIBBON = 2;
-    private static final String TAG = "HomeActivity_";
+    public static final int
+            REQUEST_WRITE_STORAGE = 1,
+            REQUEST_UPDATE_RIBBON = 2;
     public static final String INDEX_KEY = "INDEX_KEY";
+    private static final String TAG = "HomeActivity_";
+    private static final String NEW_RIBBON_DIALOG_TAG = "NEW_RIBBON_DIALOG_TAG";
     private static boolean justAsked = false;
     private static Context context;
     private RibbonAdapter adapter;
@@ -38,19 +41,78 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
     }
 
     @Override
-    public void onAdd(Ribbon ribbon, int index) {
-        MainApplication.getDatabase().addRibbon(ribbon, index);
+    public void onAdd(final Ribbon ribbon, final int index) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                MainApplication.getDatabase().addRibbon(ribbon, index);
+                return null;
+            }
+        }.execute();
     }
 
     @Override
-    public void onDelete(Ribbon ribbon, int position) {
-        MainApplication.getDatabase().deleteRibbon(ribbon);
+    public void onDelete(final Ribbon ribbon, final int position) {
+        Snackbar.make(
+                findViewById(R.id.layout_home),
+                R.string.count_deleted,
+                Snackbar.LENGTH_LONG)
+                .setAction(R.string.undo_count_deleted, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        adapter.insert(position, ribbon, true);
+                    }
+                }).show();
+
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                MainApplication.getDatabase().deleteRibbon(ribbon);
+                return null;
+            }
+        }.execute();
     }
 
     @Override
-    public void onUpdate(Ribbon ribbon) {
-        MainApplication.getDatabase().updateRibbon(ribbon);
+    public void onUpdate(final Ribbon ribbon) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                MainApplication.getDatabase().updateRibbon(ribbon);
+                return null;
+            }
+        }.execute();
     }
+
+    @Override
+    public void onClick(final Ribbon ribbon, int position) {
+        ribbon.setLastVisitedToNow();
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                MainApplication.getDatabase().updateRibbon(ribbon);
+                return null;
+            }
+        }.execute();
+        Intent intent = new Intent(this, ReadingActivity.class)
+                .putExtra(ReadingActivity.RIBBON_KEY, ribbon)
+                .putExtra(HomeActivity.INDEX_KEY, position);
+        startActivityForResult(intent, REQUEST_UPDATE_RIBBON);
+    }
+
+    @Override
+    public void onDrag(final Ribbon ribbon, final int start, final int end) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                MainApplication.getDatabase().moveRibbon(ribbon.getId(), start, end);
+                return null;
+            }
+        }.execute();
+    }
+
+    @Override
+    public void onLongPress(Ribbon ribbon, int position) {}
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -69,24 +131,6 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
     }
 
     @Override
-    public void onClick(Ribbon ribbon, int position) {
-        ribbon.setLastVisitedToNow();
-        MainApplication.getDatabase().updateRibbon(ribbon);
-        Intent intent = new Intent(this, ReadingActivity.class)
-                .putExtra(ReadingActivity.RIBBON_KEY, ribbon)
-                .putExtra(HomeActivity.INDEX_KEY, position);
-        startActivityForResult(intent, REQUEST_UPDATE_RIBBON);
-    }
-
-    @Override
-    public void onDrag(Ribbon ribbon, int start, int end) {
-        MainApplication.getDatabase().moveRibbon(ribbon.getId(), start, end);
-    }
-
-    @Override
-    public void onLongPress(Ribbon ribbon, int position) {}
-
-    @Override
     public void onRequestPermissionsResult(
             int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -96,7 +140,7 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
                 }
                 else {
                     Snackbar snackbar = Snackbar.make(
-                            findViewById(R.id.activity_home),
+                            findViewById(R.id.layout_home),
                             getString(R.string.grant_permission),
                             Snackbar.LENGTH_LONG);
                     ((TextView) (snackbar.getView())
@@ -124,13 +168,21 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
         context = getApplicationContext();
         setContentView(R.layout.activity_home);
 
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                newRibbon();
+            }
+        });
+
         Translation NIV = Translation.get(this, "NIV");
         if (NIV != null) {
             Translation.setDefault(NIV);
         }
         else {
             Snackbar.make(
-                    findViewById(R.id.activity_home),
+                    findViewById(R.id.layout_home),
                     String.format(getResources().getString(R.string.unable_to_load_bible), "NIV"),
                     Snackbar.LENGTH_LONG).show();
         }
@@ -147,6 +199,7 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
         }
 
         if (adapter.getItemCount() == 0) {
+            // TODO
             adapter.add(new Ribbon(), true);
         }
 
@@ -168,5 +221,27 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
         spacer.setDrawable(
                 ContextCompat.getDrawable(getApplicationContext(), R.drawable.ribbon_spacer));
         ribbonList.addItemDecoration(spacer);
+    }
+
+    private void newRibbon() {
+        FragmentManager fm = getSupportFragmentManager();
+        NewRibbonDialog dialog = new NewRibbonDialog();
+        dialog.setListener(this);
+        dialog.show(fm, NEW_RIBBON_DIALOG_TAG);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    public void onRibbonNameReceived(String name) {
+        Ribbon addMe = new Ribbon(Reference.getDefault(), name);
+        adapter.add(addMe, true);
+        Intent intent = new Intent(this, ReadingActivity.class)
+                .putExtra(ReadingActivity.RIBBON_KEY, addMe)
+                .putExtra(HomeActivity.INDEX_KEY, adapter.getItemCount() - 1);
+        startActivityForResult(intent, REQUEST_UPDATE_RIBBON);
     }
 }
