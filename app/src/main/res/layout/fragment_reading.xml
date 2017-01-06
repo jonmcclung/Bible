@@ -6,18 +6,13 @@
     android:layout_height="wrap_content"
     android:descendantFocusability="blocksDescendants"
     android:orientation="vertical"
+    android:paddingTop="@dimen/activity_reading_padding"
+    android:paddingBottom="@dimen/activity_reading_end_padding"
     android:paddingEnd="@dimen/activity_reading_padding"
     android:paddingLeft="@dimen/activity_reading_padding"
     android:paddingRight="@dimen/activity_reading_padding"
-    android:paddingStart="@dimen/activity_reading_padding">
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/activity_reading_toolbar_height"/>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/activity_reading_padding"/>
+    android:paddingStart="@dimen/activity_reading_padding"
+    android:clipToPadding="false">
 
     <TextView
         android:id="@+id/chapterText"
@@ -25,8 +20,4 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"/>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/activity_reading_end_padding"/>
 </LinearLayout>
