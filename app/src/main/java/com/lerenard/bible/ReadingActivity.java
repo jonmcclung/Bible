@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -23,7 +24,7 @@ public class ReadingActivity extends AppCompatActivity {
     private TextView bookNameView;
     private TextView chapterNameView;
     private ViewPager pager;
-    private ScrollView scrollView;
+    private NestedScrollView scrollView;
     private Ribbon ribbon;
     private TextView translationNameView;
     private int index;
@@ -71,7 +72,7 @@ public class ReadingActivity extends AppCompatActivity {
         }
         currentPosition = ribbon.getPosition();
 
-        scrollView = (ScrollView) findViewById(R.id.scrollView);
+        scrollView = (NestedScrollView) findViewById(R.id.scrollView);
 
         bookNameView = (TextView) findViewById(R.id.book_name_view);
         bookNameView.setOnClickListener(
