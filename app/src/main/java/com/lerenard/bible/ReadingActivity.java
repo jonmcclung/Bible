@@ -68,7 +68,7 @@ public class ReadingActivity extends AppCompatActivity {
         Intent data = new Intent();
         data.putExtra(RIBBON_KEY, ribbon);
         if (index != -1) {
-            data.putExtra(HomeActivity.INDEX_KEY, index);
+            data.putExtra(RibbonActivity.INDEX_KEY, index);
         }
         setResult(RESULT_OK, data);
         finish();
@@ -82,8 +82,8 @@ public class ReadingActivity extends AppCompatActivity {
         Bundle savedState =
                 (savedInstanceState == null ? getIntent().getExtras() : savedInstanceState);
         ribbon = savedState.getParcelable(RIBBON_KEY);
-        if (savedState.containsKey(HomeActivity.INDEX_KEY)) {
-            index = savedState.getInt(HomeActivity.INDEX_KEY);
+        if (savedState.containsKey(RibbonActivity.INDEX_KEY)) {
+            index = savedState.getInt(RibbonActivity.INDEX_KEY);
         }
         else {
             index = -1;
@@ -147,10 +147,6 @@ public class ReadingActivity extends AppCompatActivity {
 
             @Override
             protected Void doInBackground(Void... params) {
-                /*if (!alreadyAdded) {
-                    db.addCount(count);
-                    alreadyAdded = true;
-                }*/
                 db.updateRibbon(ribbon);
                 return null;
             }
@@ -161,7 +157,7 @@ public class ReadingActivity extends AppCompatActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelable(RIBBON_KEY, ribbon);
-        outState.putInt(HomeActivity.INDEX_KEY, index);
+        outState.putInt(RibbonActivity.INDEX_KEY, index);
     }
 
     class StartSelectorFragmentListener implements View.OnClickListener {

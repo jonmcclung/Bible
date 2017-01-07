@@ -23,7 +23,7 @@
             android:paddingEnd="@dimen/home_ribbon_list_side_padding"
             android:scrollbars="vertical"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            tools:context=".HomeActivity"/>
+            tools:context=".RibbonActivity"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"

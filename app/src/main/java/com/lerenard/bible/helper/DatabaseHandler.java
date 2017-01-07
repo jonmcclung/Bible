@@ -62,46 +62,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_TABLE_RIBBONS);
+        addRibbon(new Ribbon(
+                new Reference("John", 1, 1, Translation.getDefault(context)),
+                "Personal Reading"));
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Log.d(TAG, "upgrading from " + oldVersion + " to " + newVersion);
-    }
-
-    public void moveRibbon(long fromId, int fromPosition, int toPosition) {
-        if (Math.abs(fromPosition - toPosition) != 1) {
-            Log.e(TAG, "fromPosition: " + fromPosition + ", toPosition: " + toPosition +
-                       ". But they should differ by exactly one");
-        }
-
-        ContentValues newValuesForTo = new ContentValues();
-        newValuesForTo.put(RIBBONS_POSITION_IN_LIST, fromPosition);
-
-        ContentValues newValuesForFrom = new ContentValues();
-        newValuesForFrom.put(RIBBONS_POSITION_IN_LIST, toPosition);
-
-        SQLiteDatabase db = getWritableDatabase();
-        db.beginTransaction();
-        try {
-
-            db.update(
-                    TABLE_RIBBONS,
-                    newValuesForTo,
-                    RIBBONS_POSITION_IN_LIST + " = ?",
-                    new String[]{String.valueOf(toPosition)});
-
-            db.update(
-                    TABLE_RIBBONS,
-                    newValuesForFrom,
-                    _ID + " = ?",
-                    new String[]{String.valueOf(fromId)});
-
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
-        }
-        db.close();
     }
 
     public void addRibbon(Ribbon ribbon) {
@@ -140,6 +108,41 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return values;
     }
 
+    public void moveRibbon(long fromId, int fromPosition, int toPosition) {
+        if (Math.abs(fromPosition - toPosition) != 1) {
+            Log.e(TAG, "fromPosition: " + fromPosition + ", toPosition: " + toPosition +
+                       ". But they should differ by exactly one");
+        }
+
+        ContentValues newValuesForTo = new ContentValues();
+        newValuesForTo.put(RIBBONS_POSITION_IN_LIST, fromPosition);
+
+        ContentValues newValuesForFrom = new ContentValues();
+        newValuesForFrom.put(RIBBONS_POSITION_IN_LIST, toPosition);
+
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+
+            db.update(
+                    TABLE_RIBBONS,
+                    newValuesForTo,
+                    RIBBONS_POSITION_IN_LIST + " = ?",
+                    new String[]{String.valueOf(toPosition)});
+
+            db.update(
+                    TABLE_RIBBONS,
+                    newValuesForFrom,
+                    _ID + " = ?",
+                    new String[]{String.valueOf(fromId)});
+
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+        db.close();
+    }
+
     public Ribbon getRibbon(int id) {
         SQLiteDatabase db = getReadableDatabase();
 
@@ -159,7 +162,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     public Ribbon getRibbon(Cursor cursor) {
-        String translationName = cursor.getString(cursor.getColumnIndex(RIBBONS_REF_TRANSLATION_NAME));
+        String translationName =
+                cursor.getString(cursor.getColumnIndex(RIBBONS_REF_TRANSLATION_NAME));
         Translation translation = Translation.get(context, translationName);
         return new Ribbon(
                 cursor.getInt(cursor.getColumnIndex(_ID)),
@@ -198,7 +202,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 + RIBBONS_LAST_VISITED + ", "
                 + RIBBONS_POSITION_IN_LIST + " FROM "
                 + TABLE_RIBBONS
-                + " ORDER BY " + RIBBONS_POSITION_IN_LIST, null);
+                + " ORDER BY " + RIBBONS_LAST_VISITED + " DESC", null);
         itemCount = res.getCount();
         return res;
     }
@@ -297,5 +301,19 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public Cursor getCursor() {
         return getCursor(getWritableDatabase());
+    }
+
+    public Ribbon getLastUsed() {
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.query(
+                TABLE_RIBBONS,
+                star,
+                RIBBONS_LAST_VISITED + " = (SELECT MAX(" + RIBBONS_LAST_VISITED + ") FROM " +
+                TABLE_RIBBONS + ")", null, null, null, null);
+        cursor.moveToFirst();
+        Ribbon res = getRibbon(cursor);
+        cursor.close();
+        db.close();
+        return res;
     }
 }

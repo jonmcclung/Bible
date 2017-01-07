@@ -36,7 +36,7 @@ public class Translation implements Parcelable {
     private static final String TAG = "Translation_";
     private static Translation defaultTranslation = null;
     private static HashMap<String, Translation> allTranslations = new HashMap<>();
-    private static String[] allTranslationNames = {"ESV", "NIV", "MSG", "NLT"};
+    private static String[] allTranslationNames = {"NIV", "ESV", "NLT", "MSG"};
     private List<Book> books;
     private String name;
 
@@ -158,7 +158,8 @@ public class Translation implements Parcelable {
                     Map.Entry<String, JsonNode> verseField = verseFields.next();
                     int verseNumber = Integer.parseInt(verseField.getKey()) - 1;
                     while (verses.size() <= verseNumber) {
-                        Log.d(TAG, name + " " + bookName + " " + (chapterIndex + 1) + " needed more verses");
+                        Log.d(TAG, name + " " + bookName + " " + (chapterIndex + 1) +
+                                   " needed more verses");
                         verses.add(new Verse(""));
                     }
                     verses.set(
@@ -181,6 +182,14 @@ public class Translation implements Parcelable {
 
     public static void setDefault(Translation defaultTranslation) {
         Translation.defaultTranslation = defaultTranslation;
+    }
+
+    public static Translation getDefault(Context context) {
+        int i = 0;
+        while (getDefault() == null) {
+            setDefault(get(context, allTranslationNames[i++]));
+        }
+        return getDefault();
     }
 
     @Override

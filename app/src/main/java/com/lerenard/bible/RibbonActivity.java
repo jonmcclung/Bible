@@ -23,8 +23,8 @@ import co.paulburke.android.itemtouchhelperdemo.helper.SimpleItemTouchHelperCall
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
-public class HomeActivity extends AppCompatActivity implements DataSetListener<Ribbon>,
-                                                               RibbonNameListener {
+public class RibbonActivity extends AppCompatActivity implements DataSetListener<Ribbon>,
+                                                                 RibbonNameListener {
 
     public static final int
             REQUEST_WRITE_STORAGE = 1,
@@ -96,7 +96,7 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
         }.execute();
         Intent intent = new Intent(this, ReadingActivity.class)
                 .putExtra(ReadingActivity.RIBBON_KEY, ribbon)
-                .putExtra(HomeActivity.INDEX_KEY, position);
+                .putExtra(RibbonActivity.INDEX_KEY, position);
         startActivityForResult(intent, REQUEST_UPDATE_RIBBON);
     }
 
@@ -150,7 +150,7 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
                         @Override
                         public void onClick(View view) {
                             ActivityCompat.requestPermissions(
-                                    HomeActivity.this,
+                                    RibbonActivity.this,
                                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                                     REQUEST_WRITE_STORAGE);
                         }
@@ -236,7 +236,7 @@ public class HomeActivity extends AppCompatActivity implements DataSetListener<R
         adapter.add(addMe, true);
         Intent intent = new Intent(this, ReadingActivity.class)
                 .putExtra(ReadingActivity.RIBBON_KEY, addMe)
-                .putExtra(HomeActivity.INDEX_KEY, adapter.getItemCount() - 1);
+                .putExtra(RibbonActivity.INDEX_KEY, adapter.getItemCount() - 1);
         startActivityForResult(intent, REQUEST_UPDATE_RIBBON);
     }
 }

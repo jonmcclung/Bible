@@ -20,4 +20,6 @@
     <string name="choose_name_for_ribbon_explanation">Ribbons represent bookmarks you can use to keep track of your reading in different contexts. Choose a name for your ribbon below:</string>
     <string name="church_suggestion">Church</string>
     <string name="custom_ribbon_name_hint">Other:</string>
+
+    <string name="title_activity_splash">@string/app_name</string>
 </resources>
