@@ -23,9 +23,9 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
     public static final int
             REQUEST_UPDATE_RIBBON = 2,
             REQUEST_SELECT_RIBBON_REFERENCE = 3;
+    public static final String RIBBON_ID_KEY = "RIBBON_ID_KEY";
     private static final String TAG = "HomeActivity_";
     private static final String NEW_RIBBON_DIALOG_TAG = "NEW_RIBBON_DIALOG_TAG";
-    public static final String RIBBON_ID_KEY = "RIBBON_ID_KEY";
     private static boolean justAsked = false;
     private RibbonAdapter adapter;
     private long oldRibbonId;
@@ -89,6 +89,11 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
         Log.d(TAG, "set can go back to " + canGoBack + " which is " + canGoBack());
     }
 
+    private boolean canGoBack() {
+        Log.d(TAG, "oldRibbonId is " + oldRibbonId);
+        return oldRibbonId > 0;
+    }
+
     @Override
     public void onUpdate(final Ribbon ribbon) {
         new AsyncTask<Void, Void, Void>() {
@@ -114,15 +119,7 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
     }
 
     @Override
-    public void onDrag(final Ribbon ribbon, final int start, final int end) {
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                MainApplication.getDatabase().moveRibbon(ribbon.getId(), start, end);
-                return null;
-            }
-        }.execute();
-    }
+    public void onDrag(Ribbon ribbon, int start, int end) {}
 
     @Override
     public void onLongPress(Ribbon ribbon, int position) {}
@@ -132,13 +129,6 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
                 .putExtra(ReadingActivity.RIBBON_KEY, ribbon);
         setResult(RESULT_OK, intent);
         finish();
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        Log.d(TAG, "saving oldRibbonId: " + oldRibbonId);
-        outState.putLong(RIBBON_ID_KEY, oldRibbonId);
     }
 
     @Override
@@ -190,6 +180,13 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
         ribbonList.addItemDecoration(spacer);
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.d(TAG, "saving oldRibbonId: " + oldRibbonId);
+        outState.putLong(RIBBON_ID_KEY, oldRibbonId);
+    }
+
     private void newRibbon() {
         FragmentManager fm = getSupportFragmentManager();
         NewRibbonDialog dialog = new NewRibbonDialog();
@@ -238,11 +235,6 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
                     getString(R.string.refuse_back_to_deleted_ribbon),
                     Snackbar.LENGTH_SHORT).show();
         }
-    }
-
-    private boolean canGoBack() {
-        Log.d(TAG, "oldRibbonId is " + oldRibbonId);
-        return oldRibbonId > 0;
     }
 
     @Override

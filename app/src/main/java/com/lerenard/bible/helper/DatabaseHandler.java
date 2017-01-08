@@ -24,7 +24,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     private static final String TAG = "DatabaseHandler";
     private static final int
-            DATABASE_VERSION = 1;
+            DATABASE_VERSION = 2;
     private static final String
             DATABASE_NAME = "bible.db",
             TABLE_RIBBONS = "RIBBONS",
@@ -34,7 +34,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             RIBBONS_REF_VERSE = "verse",
             RIBBONS_REF_TRANSLATION_NAME = "translation_name",
             RIBBONS_LAST_VISITED = "last_visited",
-            RIBBONS_POSITION_IN_LIST = "position_in_list",
+            RIBBONS_POSITION_IN_LIST = "position_in_list", // no longer in use
 
     CREATE_TABLE_RIBBONS =
             "CREATE TABLE " + TABLE_RIBBONS + "("
@@ -43,14 +43,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             + RIBBONS_REF_POSITION + " INTEGER, "
             + RIBBONS_REF_VERSE + " INTEGER, "
             + RIBBONS_REF_TRANSLATION_NAME + " TEXT, "
-            + RIBBONS_LAST_VISITED + " INTEGER, "
-            + RIBBONS_POSITION_IN_LIST + " INTEGER)";
+            + RIBBONS_LAST_VISITED + " INTEGER)";
 
     private static final String[] star = {
             _ID, RIBBONS_NAME, RIBBONS_REF_POSITION, RIBBONS_REF_VERSE,
-            RIBBONS_REF_TRANSLATION_NAME, RIBBONS_LAST_VISITED, RIBBONS_POSITION_IN_LIST};
-
-    private int itemCount = -1;
+            RIBBONS_REF_TRANSLATION_NAME, RIBBONS_LAST_VISITED};
 
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -64,13 +61,35 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 Reference.getDefault(),
                 "Personal Reading");
         ContentValues values = getValues(firstRibbon);
-        values.put(RIBBONS_POSITION_IN_LIST, 0);
         db.insert(TABLE_RIBBONS, null, values);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Log.d(TAG, "upgrading from " + oldVersion + " to " + newVersion);
+        if (oldVersion < 2) {
+            String TABLE_RIBBONS_BACKUP = TABLE_RIBBONS + "_BACKUP";
+            db.execSQL("BEGIN TRANSACTION");
+            db.execSQL("CREATE TEMPORARY TABLE " + TABLE_RIBBONS_BACKUP + "("
+                       + _ID + " INTEGER PRIMARY KEY, "
+                       + RIBBONS_NAME + " TEXT, "
+                       + RIBBONS_REF_POSITION + " INTEGER, "
+                       + RIBBONS_REF_VERSE + " INTEGER, "
+                       + RIBBONS_REF_TRANSLATION_NAME + " TEXT, "
+                       + RIBBONS_LAST_VISITED + " INTEGER)");
+            db.execSQL("INSERT INTO " + TABLE_RIBBONS_BACKUP +
+                       " SELECT " + _ID + ", " + RIBBONS_NAME + ", " + RIBBONS_REF_POSITION +
+                       ", " + RIBBONS_REF_VERSE + ", " + RIBBONS_REF_TRANSLATION_NAME + ", " +
+                       RIBBONS_LAST_VISITED + " FROM " + TABLE_RIBBONS);
+            db.execSQL("DROP TABLE " + TABLE_RIBBONS);
+            db.execSQL(CREATE_TABLE_RIBBONS);
+            db.execSQL("INSERT INTO " + TABLE_RIBBONS +
+                       " SELECT " + _ID + ", " + RIBBONS_NAME + ", " + RIBBONS_REF_POSITION +
+                       ", " + RIBBONS_REF_VERSE + ", " + RIBBONS_REF_TRANSLATION_NAME + ", " +
+                       RIBBONS_LAST_VISITED + " FROM " + TABLE_RIBBONS_BACKUP);
+            db.execSQL("DROP TABLE " + TABLE_RIBBONS_BACKUP);
+            db.execSQL("COMMIT");
+        }
     }
 
     /**
@@ -89,57 +108,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return values;
     }
 
-    public void addRibbon(Ribbon ribbon) {
-        addRibbon(ribbon, itemCount);
-    }
-
     public void addRibbon(Ribbon ribbon, int position) {
         SQLiteDatabase db = getWritableDatabase();
-
-        if (position != itemCount++) {
-            db.execSQL(
-                    "UPDATE " + TABLE_RIBBONS + " SET " + RIBBONS_POSITION_IN_LIST + " = " +
-                    RIBBONS_POSITION_IN_LIST +
-                    " + 1 WHERE " + RIBBONS_POSITION_IN_LIST + " >= " + position);
-        }
-
         ContentValues values = getValues(ribbon);
-        values.put(RIBBONS_POSITION_IN_LIST, position);
         ribbon.setId(db.insert(TABLE_RIBBONS, null, values));
-    }
-
-    public void moveRibbon(long fromId, int fromPosition, int toPosition) {
-        if (Math.abs(fromPosition - toPosition) != 1) {
-            Log.e(TAG, "fromPosition: " + fromPosition + ", toPosition: " + toPosition +
-                       ". But they should differ by exactly one");
-        }
-
-        ContentValues newValuesForTo = new ContentValues();
-        newValuesForTo.put(RIBBONS_POSITION_IN_LIST, fromPosition);
-
-        ContentValues newValuesForFrom = new ContentValues();
-        newValuesForFrom.put(RIBBONS_POSITION_IN_LIST, toPosition);
-
-        SQLiteDatabase db = getWritableDatabase();
-        db.beginTransaction();
-        try {
-
-            db.update(
-                    TABLE_RIBBONS,
-                    newValuesForTo,
-                    RIBBONS_POSITION_IN_LIST + " = ?",
-                    new String[]{String.valueOf(toPosition)});
-
-            db.update(
-                    TABLE_RIBBONS,
-                    newValuesForFrom,
-                    _ID + " = ?",
-                    new String[]{String.valueOf(fromId)});
-
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
-        }
     }
 
     public Ribbon getRibbon(int id) {
@@ -196,11 +168,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 + RIBBONS_REF_POSITION + ", "
                 + RIBBONS_REF_VERSE + ", "
                 + RIBBONS_REF_TRANSLATION_NAME + ", "
-                + RIBBONS_LAST_VISITED + ", "
-                + RIBBONS_POSITION_IN_LIST + " FROM "
+                + RIBBONS_LAST_VISITED + " FROM "
                 + TABLE_RIBBONS
                 + " ORDER BY " + RIBBONS_LAST_VISITED, null);
-        itemCount = res.getCount();
         return res;
     }
 
@@ -238,7 +208,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 TABLE_RIBBONS,
                 star,
                 null, null, null, null,
-                RIBBONS_POSITION_IN_LIST + " DESC");
+                RIBBONS_LAST_VISITED);
         if (cursor.moveToFirst()) {
             do {
                 for (String column : star) {
@@ -257,39 +227,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public void deleteRibbon(Ribbon ribbon) {
         SQLiteDatabase db = getWritableDatabase();
-        db.beginTransaction();
-        try {
-            Cursor cursor = db.query(
-                    TABLE_RIBBONS,
-                    new String[]{RIBBONS_POSITION_IN_LIST},
-                    _ID + " = ?",
-                    new String[]{String.valueOf(ribbon.getId())},
-                    null, null, null);
-            int positionColumn = cursor.getColumnIndexOrThrow(RIBBONS_POSITION_IN_LIST);
-            if (cursor.moveToFirst()) {
-                int oldPosition = cursor.getInt(positionColumn);
-                cursor.close();
 
-                db.delete(
-                        TABLE_RIBBONS,
-                        _ID + " = ?",
-                        new String[]{Long.toString(ribbon.getId())});
-                --itemCount;
-
-                db.execSQL("UPDATE " + TABLE_RIBBONS +
-                           " SET " + RIBBONS_POSITION_IN_LIST + " = " + RIBBONS_POSITION_IN_LIST +
-                           " - 1" +
-                           " WHERE " + RIBBONS_POSITION_IN_LIST + " > " +
-                           Integer.toString(oldPosition));
-                db.setTransactionSuccessful();
-            }
-        } finally {
-            db.endTransaction();
-        }
-    }
-
-    public int getCount() {
-        return itemCount;
+        db.delete(
+                TABLE_RIBBONS,
+                _ID + " = ?",
+                new String[]{Long.toString(ribbon.getId())});
     }
 
     public Cursor getCursor() {
