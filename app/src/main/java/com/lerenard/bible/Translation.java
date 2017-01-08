@@ -124,7 +124,6 @@ public class Translation implements Parcelable {
         }
         int i = 0;
         while (defaultTranslation == null) {
-            Log.d(TAG, "default is null, i: " + i + ", about to try " + allTranslationNames.get(i));
             setDefault(get(allTranslationNames.get(i++)));
         }
         return defaultTranslation;
@@ -170,14 +169,12 @@ public class Translation implements Parcelable {
 
     public static ArrayList<Book> fromJson(final String name, final InputStream stream) throws
             IOException {
-        Log.d(TAG, "asked to load " + name);
         ObjectMapper mapper = new ObjectMapper();
         TypeReference<JsonNode> typeReference =
                 new TypeReference<JsonNode>() {
                 };
         final JsonNode map = mapper.readValue(stream, typeReference);
         long start = System.currentTimeMillis();
-        Log.d(TAG, "started loading " + name);
         List<String> bookNames = Reference.allBooks;
 
         ArrayList<Book> books = new ArrayList<>(bookNames.size());

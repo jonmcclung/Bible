@@ -1,11 +1,17 @@
 package com.lerenard.bible;
 
+import android.app.Dialog;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.text.Editable;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -17,6 +23,7 @@ import android.widget.TextView;
  */
 
 public class EditRibbonNameDialog extends DialogFragment {
+    private static final String TAG = "ERNDialog_";
     private EditRibbonNameListener listener;
     private Ribbon ribbon;
     private int position;
@@ -43,19 +50,29 @@ public class EditRibbonNameDialog extends DialogFragment {
         position = args.getInt(RibbonActivity.INDEX_KEY);
     }
 
-    @Nullable
     @Override
-    public View onCreateView(
-            LayoutInflater inflater, @Nullable ViewGroup container,
-            @Nullable Bundle savedInstanceState) {
+    public void onDestroyView() {
+        Dialog dialog = getDialog();
+        // handles https://code.google.com/p/android/issues/detail?id=17423
+        if (dialog != null && getRetainInstance()) {
+            dialog.setDismissMessage(null);
+        }
+        super.onDestroyView();
+    }
+
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        setRetainInstance(true);
         if (savedInstanceState != null) {
             restoreArguments(savedInstanceState);
         }
 
         View dialogView =
-                inflater.inflate(R.layout.edit_ribbon_name_dialog_layout, container, false);
+                getActivity().getLayoutInflater().inflate(R.layout.edit_ribbon_name_dialog_layout, null);
         final EditText editText =
                 (EditText) dialogView.findViewById(R.id.edit_ribbon_name_dialog_edit_text);
+        editText.setText(ribbon.getName());
         editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
@@ -67,7 +84,7 @@ public class EditRibbonNameDialog extends DialogFragment {
                 return false;
             }
         });
-        return dialogView;
+        return new AlertDialog.Builder(getContext()).setView(dialogView).create();
     }
 
     private void finish(String newName) {

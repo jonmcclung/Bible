@@ -12,22 +12,22 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.view.View;
 
 import co.paulburke.android.itemtouchhelperdemo.helper.SimpleItemTouchHelperCallback;
 
 public class RibbonActivity extends AppCompatActivity implements DataSetListener<Ribbon>,
                                                                  RibbonNameListener,
-                                                                 EditRibbonNameDialog.EditRibbonNameListener {
+                                                                 EditRibbonNameDialog
+                                                                         .EditRibbonNameListener {
 
     public static final int
             REQUEST_UPDATE_RIBBON = 2,
             REQUEST_SELECT_RIBBON_REFERENCE = 3;
     public static final String RIBBON_ID_KEY = "RIBBON_ID_KEY";
+    public static final String INDEX_KEY = "INDEX_KEY";
     private static final String TAG = "HomeActivity_";
     private static final String NEW_RIBBON_DIALOG_TAG = "NEW_RIBBON_DIALOG_TAG";
-    public static final String INDEX_KEY = "INDEX_KEY";
     private static final String EDIT_RIBBON_NAME_TAG = "EDIT_RIBBON_NAME_TAG";
     private static boolean justAsked = false;
     private RibbonAdapter adapter;
@@ -89,12 +89,6 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
         else {
             oldRibbonId = -goodRibbonId;
         }
-        Log.d(TAG, "set can go back to " + canGoBack + " which is " + canGoBack());
-    }
-
-    private boolean canGoBack() {
-        Log.d(TAG, "oldRibbonId is " + oldRibbonId);
-        return oldRibbonId > 0;
     }
 
     @Override
@@ -145,6 +139,22 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
     }
 
     @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        EditRibbonNameDialog editRibbonNameDialog = (EditRibbonNameDialog) getSupportFragmentManager()
+                .findFragmentByTag(EDIT_RIBBON_NAME_TAG);
+        if (editRibbonNameDialog != null) {
+            editRibbonNameDialog.setListener(this);
+        }
+        NewRibbonDialog newRibbonDialog =
+                (NewRibbonDialog) getSupportFragmentManager()
+                        .findFragmentByTag(NEW_RIBBON_DIALOG_TAG);
+        if (newRibbonDialog != null) {
+            newRibbonDialog.setListener(this);
+        }
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ribbon);
@@ -153,7 +163,6 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
                 savedInstanceState == null ? getIntent().getExtras() : savedInstanceState;
 
         oldRibbonId = savedState.getLong(RIBBON_ID_KEY);
-        Log.d(TAG, "restoring oldRibbonId: " + oldRibbonId);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -201,7 +210,6 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        Log.d(TAG, "saving oldRibbonId: " + oldRibbonId);
         outState.putLong(RIBBON_ID_KEY, oldRibbonId);
     }
 
@@ -253,6 +261,10 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
                     getString(R.string.refuse_back_to_deleted_ribbon),
                     Snackbar.LENGTH_SHORT).show();
         }
+    }
+
+    private boolean canGoBack() {
+        return oldRibbonId > 0;
     }
 
     @Override

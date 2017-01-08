@@ -1,19 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
-    <TextView
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/edit_ribbon_name_dialog_title"
-        android:textColor="@color/dialog_title_text_color"
-        android:textSize="@dimen/dialog_title_text_size"/>
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/edit_ribbon_name_dialog_edit_text"
-        android:imeOptions="actionGo"
-        android:inputType="textAutoCorrect|textCapWords"
-        android:maxLines="1"/>
-</LinearLayout>
+        android:background="@color/background"
+        android:orientation="vertical"
+        android:padding="@dimen/dialog_padding">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/edit_ribbon_name_dialog_title"
+            android:textColor="@color/dialog_title_text_color"
+            android:textSize="@dimen/dialog_title_text_size"/>
+
+        <EditText
+            android:id="@+id/edit_ribbon_name_dialog_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionGo"
+            android:inputType="textAutoCorrect|textCapWords"
+            android:maxLines="1"
+            android:textColor="@color/dialog_text_color"/>
+    </LinearLayout>
+</ScrollView>
