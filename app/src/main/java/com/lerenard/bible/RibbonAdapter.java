@@ -35,4 +35,8 @@ public class RibbonAdapter extends RecyclerAdapter<Ribbon, RibbonViewHolder> {
                 .inflate(layout, parent, false);
         return supplier.get(view, this);
     }
+
+    public Ribbon getLastVisited() {
+        return items.get(items.size() - 1);
+    }
 }

@@ -52,6 +52,7 @@ public class ReadingActivity extends AppCompatActivity {
                     break;
                 case SELECT_RIBBON_CODE:
                     ribbon = data.getExtras().getParcelable(RIBBON_KEY);
+                    pager.setCurrentItem(ribbon.getPosition());
                     break;
                 default:
                     throw new IllegalStateException("unexpected requestCode: " + requestCode);
@@ -89,8 +90,7 @@ public class ReadingActivity extends AppCompatActivity {
 
     private void goToRibbons() {
         updateDatabaseWithRibbon();
-        Intent ribbonIntent = new Intent(getApplicationContext(), RibbonActivity.class)
-                .putExtra(RIBBON_KEY, ribbon);
+        Intent ribbonIntent = new Intent(getApplicationContext(), RibbonActivity.class);
         startActivityForResult(ribbonIntent, SELECT_RIBBON_CODE);
     }
 

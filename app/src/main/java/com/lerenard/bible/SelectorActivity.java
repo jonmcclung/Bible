@@ -24,9 +24,6 @@ public class SelectorActivity extends AppCompatActivity
         if (savedInstanceState == null) {
             Intent intent = getIntent();
             Bundle extras = intent.getExtras();
-            SelectorPosition selectorPosition =
-                    (SelectorPosition) extras.getSerializable(SelectorFragment.SELECTOR_POS_KEY);
-            Ribbon ribbon = extras.getParcelable(ReadingActivity.RIBBON_KEY);
             SelectorFragment selectorFragment = new SelectorFragment();
             selectorFragment.setArguments(extras);
             selectorFragment.setListener(this);
