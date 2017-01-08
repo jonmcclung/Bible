@@ -18,7 +18,8 @@ import android.view.View;
 import co.paulburke.android.itemtouchhelperdemo.helper.SimpleItemTouchHelperCallback;
 
 public class RibbonActivity extends AppCompatActivity implements DataSetListener<Ribbon>,
-                                                                 RibbonNameListener {
+                                                                 RibbonNameListener,
+                                                                 EditRibbonNameDialog.EditRibbonNameListener {
 
     public static final int
             REQUEST_UPDATE_RIBBON = 2,
@@ -26,6 +27,8 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
     public static final String RIBBON_ID_KEY = "RIBBON_ID_KEY";
     private static final String TAG = "HomeActivity_";
     private static final String NEW_RIBBON_DIALOG_TAG = "NEW_RIBBON_DIALOG_TAG";
+    public static final String INDEX_KEY = "INDEX_KEY";
+    private static final String EDIT_RIBBON_NAME_TAG = "EDIT_RIBBON_NAME_TAG";
     private static boolean justAsked = false;
     private RibbonAdapter adapter;
     private long oldRibbonId;
@@ -123,6 +126,14 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
 
     @Override
     public boolean onLongPress(Ribbon ribbon, int position) {
+        FragmentManager fm = getSupportFragmentManager();
+        EditRibbonNameDialog dialog = new EditRibbonNameDialog();
+        Bundle args = new Bundle();
+        args.putParcelable(ReadingActivity.RIBBON_KEY, ribbon);
+        args.putInt(INDEX_KEY, position);
+        dialog.setArguments(args);
+        dialog.setListener(this);
+        dialog.show(fm, EDIT_RIBBON_NAME_TAG);
         return true;
     }
 
@@ -247,5 +258,12 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
     @Override
     protected void onPause() {
         super.onPause();
+    }
+
+    @Override
+    public void onEditedNameReceived(String newName, int position) {
+        adapter.get(position).setName(newName);
+        adapter.notifyItemChanged(position);
+        onUpdate(adapter.get(position));
     }
 }

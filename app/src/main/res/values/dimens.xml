@@ -24,7 +24,7 @@
     <dimen name="home_ribbon_list_side_padding">8dp</dimen>
     <dimen name="new_ribbon_dialog_padding">6dp</dimen>
     <dimen name="new_ribbon_dialog_text_size">20sp</dimen>
-    <dimen name="new_ribbon_dialog_title_text_size">28sp</dimen>
+    <dimen name="dialog_title_text_size">28sp</dimen>
     <dimen name="ribbon_view_reference_view_marginLeft">8dp</dimen>
     <dimen name="activity_reading_reference_info_view_padding_side">8dp</dimen>
 </resources>

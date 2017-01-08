@@ -11,8 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/start_new_ribbon_dialog_title"
-        android:textSize="@dimen/new_ribbon_dialog_title_text_size"
-        android:textColor="@color/new_ribbon_dialog_title_text_color"/>
+        android:textSize="@dimen/dialog_title_text_size"
+        android:textColor="@color/dialog_title_text_color"/>
 
     <TextView
         android:layout_width="match_parent"

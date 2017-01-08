@@ -25,4 +25,5 @@
     <string name="activity_reading_menu_go_to_ribbons_title">View Ribbons</string>
     <string
         name="refuse_back_to_deleted_ribbon">Ribbon has been deleted: cannot go back to it.</string>
+    <string name="edit_ribbon_name_dialog_title">Edit Name</string>
 </resources>

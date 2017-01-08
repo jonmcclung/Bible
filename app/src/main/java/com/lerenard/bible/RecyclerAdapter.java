@@ -122,4 +122,8 @@ public class RecyclerAdapter<T, VH extends RecyclerViewHolder<T>>
     public void setUnselectedColor(int unselectedColor) {
         this.unselectedColor = unselectedColor;
     }
+
+    public T get(int position) {
+        return items.get(position);
+    }
 }
