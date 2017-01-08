@@ -13,5 +13,7 @@ public class SplashActivity extends AppCompatActivity {
         Intent readingIntent = new Intent(getApplicationContext(), ReadingActivity.class)
                 .putExtra(ReadingActivity.RIBBON_KEY, MainApplication.getDatabase().getLastUsed());
         startActivity(readingIntent);
+        Translation.loadAll(getApplicationContext());
+        finish();
     }
 }
