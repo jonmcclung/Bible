@@ -1,8 +1,10 @@
 package com.lerenard.bible;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -12,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -32,65 +35,78 @@ public class Translation implements Parcelable {
             return new Translation[size];
         }
     };
-
     private static final String TAG = "Translation_";
+    private static final String DEFAULT_NAME_KEY = "DEFAULT_TRANSLATION_NAME_KEY";
     private static Translation defaultTranslation = null;
     private static HashMap<String, Translation> allTranslations = new HashMap<>();
-    private static String[] allTranslationNames = {"NIV", "ESV", "NLT", "MSG"};
-    private List<Book> books;
-    private String name;
+    private static ArrayList<String> allTranslationNames;
 
-    protected Translation(Parcel in) {
-        name = in.readString();
-        Translation cached = get(name);
-        if (cached == null) {
-            throw new IllegalStateException(
-                    "Tried to read translation from parcel, but books were not cached. name: " +
-                    name);
-        }
-        else {
-            books = cached.books;
-        }
+    static {
+        allTranslationNames = new ArrayList<>();
+        allTranslationNames.addAll(Arrays.asList("NIV", "ESV", "NLT", "MSG"));
     }
 
-    public static Translation get(String name) {
-        if (allTranslations.containsKey(name)) {
-            return allTranslations.get(name);
-        }
-        return null;
+    private final String name;
+    private List<Book> books;
+
+    protected Translation(Parcel in) {
+        this(in.readString());
+
     }
 
     public Translation(String name) {
         this.name = name;
+        if (allTranslations.containsKey(name)) {
+            this.books = allTranslations.get(name).getBooks();
+        }
+        else {
+            add(this);
+            new LoadTranslationTask().execute();
+        }
     }
 
-    public static ArrayList<Translation> getAllTranslations(Context context) {
+    public List<Book> getBooks() {
+        while (books == null) {
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        return books;
+    }
+
+    public static void add(Translation translation) {
+        allTranslations.put(translation.name, translation);
+    }
+
+    public void setBooks(@NonNull List<Book> books) {
+        this.books = books;
+    }
+
+    public static ArrayList<Translation> getAll(Context context) {
         loadAll(context);
-        return getAllTranslations();
+        return getAll();
     }
 
     public static void loadAll(Context context) {
         for (String translationName : allTranslationNames) {
-            get(context, translationName);
+            get(translationName);
         }
     }
 
-    public static ArrayList<Translation> getAllTranslations() {
-        ArrayList<Translation> res = new ArrayList<>(allTranslations.size());
-        for (Translation translation : allTranslations.values()) {
-            res.add(translation);
+    public static ArrayList<Translation> getAll() {
+        ArrayList<Translation> res = new ArrayList<>(allTranslationNames.size());
+        for (String translationName : allTranslationNames) {
+            res.add(get(translationName));
         }
         return res;
     }
 
-    public static Translation get(Context context, String name) {
+    public static Translation get(String name) {
         if (!allTranslations.containsKey(name) || allTranslations.get(name) == null) {
-            final Translation res =
-                    loadTranslation(context, "bibles/" + name + "/" + name + ".json", name);
+            final Translation res = new Translation(name);
             allTranslations.put(name, res);
-            if (res == null) {
-                Log.d(TAG, "unable to load " + name);
-            }
             return res;
         }
         else {
@@ -98,33 +114,75 @@ public class Translation implements Parcelable {
         }
     }
 
-    public static Translation loadTranslation(Context context, String path, String name) {
+    public static Translation getDefault() {
+        return getDefault(MainApplication.getContext());
+    }
+
+    public static Translation getDefault(Context context) {
+        if (defaultTranslation == null) {
+            setDefault(get(getDefaultName()));
+        }
+        int i = 0;
+        while (defaultTranslation == null) {
+            Log.d(TAG, "default is null, i: " + i + ", about to try " + allTranslationNames.get(i));
+            setDefault(get(allTranslationNames.get(i++)));
+        }
+        return defaultTranslation;
+    }
+
+    public static String getDefaultName() {
+        return MainApplication
+                .getContext()
+                .getSharedPreferences(
+                        MainApplication.SHARED_PREFERENCES_FILENAME,
+                        Context.MODE_PRIVATE)
+                .getString(DEFAULT_NAME_KEY, "NIV");
+    }
+
+    public static void setDefaultName(String defaultName) {
+        MainApplication
+                .getContext()
+                .getSharedPreferences(
+                        MainApplication.SHARED_PREFERENCES_FILENAME,
+                        Context.MODE_PRIVATE).edit()
+                .putString(DEFAULT_NAME_KEY, defaultName).commit();
+    }
+
+    public static void setDefault(Translation defaultTranslation) {
+        Translation.defaultTranslation = defaultTranslation;
+    }
+
+    public static ArrayList<Book> loadBooks(String name) {
         try {
-            InputStream file = context.getAssets().open(path);
-            Translation translation = Translation.fromJson(name, file);
-            Translation.add(translation);
+            InputStream file = MainApplication.getContext().getAssets().open(pathFromName(name));
+            ArrayList<Book> res = fromJson(name, file);
             file.close();
-            return translation;
+            return res;
         } catch (IOException e) {
             Log.d(TAG, e.toString());
             return null;
         }
     }
 
-    public static Translation fromJson(String name, InputStream stream) throws IOException {
+    private static String pathFromName(String name) {
+        return "bibles/" + name + "/" + name + ".json";
+    }
 
-        Translation res = new Translation(name);
+    public static ArrayList<Book> fromJson(final String name, final InputStream stream) throws
+            IOException {
+        Log.d(TAG, "asked to load " + name);
         ObjectMapper mapper = new ObjectMapper();
         TypeReference<JsonNode> typeReference =
                 new TypeReference<JsonNode>() {
                 };
-        JsonNode map = mapper.readValue(stream, typeReference);
-
+        final JsonNode map = mapper.readValue(stream, typeReference);
+        long start = System.currentTimeMillis();
+        Log.d(TAG, "started loading " + name);
         List<String> bookNames = Reference.allBooks;
 
-        res.books = new ArrayList<>(bookNames.size());
+        ArrayList<Book> books = new ArrayList<>(bookNames.size());
         for (int i = 0; i < bookNames.size(); ++i) {
-            res.books.add(null);
+            books.add(null);
         }
 
         Iterator<Map.Entry<String, JsonNode>> bookFields = map.fields();
@@ -140,9 +198,10 @@ public class Translation implements Parcelable {
 
             String bookName = bookField.getKey();
             Book book = new Book(bookName, chapters);
-            res.books.set(bookNames.indexOf(bookName), book);
+            books.set(bookNames.indexOf(bookName), book);
 
-            final Iterator<Map.Entry<String, JsonNode>> chapterFields = chapterList.fields();
+            final Iterator<Map.Entry<String, JsonNode>> chapterFields =
+                    chapterList.fields();
             while (chapterFields.hasNext()) {
                 Map.Entry<String, JsonNode> chapterField = chapterFields.next();
                 JsonNode verseList = chapterField.getValue();
@@ -153,13 +212,13 @@ public class Translation implements Parcelable {
                 }
                 int chapterIndex = Integer.parseInt(chapterField.getKey()) - 1;
                 chapters.get(chapterIndex).setVerses(verses);
-                final Iterator<Map.Entry<String, JsonNode>> verseFields = verseList.fields();
+                final Iterator<Map.Entry<String, JsonNode>> verseFields =
+                        verseList.fields();
                 while (verseFields.hasNext()) {
                     Map.Entry<String, JsonNode> verseField = verseFields.next();
                     int verseNumber = Integer.parseInt(verseField.getKey()) - 1;
                     while (verses.size() <= verseNumber) {
-                        Log.d(TAG, name + " " + bookName + " " + (chapterIndex + 1) +
-                                   " needed more verses");
+
                         verses.add(new Verse(""));
                     }
                     verses.set(
@@ -168,28 +227,11 @@ public class Translation implements Parcelable {
                 }
             }
         }
-
-        return res;
+        return books;
     }
 
-    public static void add(Translation translation) {
-        allTranslations.put(translation.name, translation);
-    }
-
-    public static Translation getDefault() {
-        return defaultTranslation;
-    }
-
-    public static void setDefault(Translation defaultTranslation) {
-        Translation.defaultTranslation = defaultTranslation;
-    }
-
-    public static Translation getDefault(Context context) {
-        int i = 0;
-        while (getDefault() == null) {
-            setDefault(get(context, allTranslationNames[i++]));
-        }
-        return getDefault();
+    public static ArrayList<String> getAllNames() {
+        return allTranslationNames;
     }
 
     @Override
@@ -197,24 +239,12 @@ public class Translation implements Parcelable {
         return super.toString() + ", name: " + name;
     }
 
-    public List<Book> getBooks() {
-        return books;
-    }
-
-    public void setBooks(List<Book> books) {
-        this.books = books;
-    }
-
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public Book getBook(int index) {
-        return books.get(index);
+        return getBooks().get(index);
     }
 
     @Override
@@ -228,5 +258,14 @@ public class Translation implements Parcelable {
             allTranslations.put(name, this);
         }
         parcel.writeString(name);
+    }
+
+    public class LoadTranslationTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            books = Translation.loadBooks(name);
+            return null;
+        }
     }
 }

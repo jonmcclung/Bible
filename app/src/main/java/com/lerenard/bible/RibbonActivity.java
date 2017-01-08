@@ -27,14 +27,27 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
                                                                  RibbonNameListener {
 
     public static final int
-            REQUEST_WRITE_STORAGE = 1,
             REQUEST_UPDATE_RIBBON = 2;
-    public static final String INDEX_KEY = "INDEX_KEY";
     private static final String TAG = "HomeActivity_";
     private static final String NEW_RIBBON_DIALOG_TAG = "NEW_RIBBON_DIALOG_TAG";
     private static boolean justAsked = false;
     private static Context context;
     private RibbonAdapter adapter;
+    private int oldRibbonId;
+
+    private boolean canGoBack() {
+        return oldRibbonId < 0;
+    }
+
+    private void setCanGoBack(boolean canGoBack) {
+        int goodRibbonId = Math.abs(oldRibbonId);
+        if (canGoBack) {
+            oldRibbonId = goodRibbonId;
+        }
+        else {
+            oldRibbonId = -goodRibbonId;
+        }
+    }
 
     public static Context getContext() {
         return context;
@@ -53,6 +66,9 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
 
     @Override
     public void onDelete(final Ribbon ribbon, final int position) {
+        if (ribbon.getId() == oldRibbonId) {
+            setCanGoBack(false);
+        }
         Snackbar.make(
                 findViewById(R.id.layout_home),
                 R.string.count_deleted,
@@ -61,6 +77,7 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
                     @Override
                     public void onClick(View v) {
                         adapter.insert(position, ribbon, true);
+                        setCanGoBack(true);
                     }
                 }).show();
 
@@ -94,10 +111,7 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
                 return null;
             }
         }.execute();
-        Intent intent = new Intent(this, ReadingActivity.class)
-                .putExtra(ReadingActivity.RIBBON_KEY, ribbon)
-                .putExtra(RibbonActivity.INDEX_KEY, position);
-        startActivityForResult(intent, REQUEST_UPDATE_RIBBON);
+        selectRibbon(ribbon);
     }
 
     @Override
@@ -115,51 +129,21 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
     public void onLongPress(Ribbon ribbon, int position) {}
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
-            switch (requestCode) {
-                case REQUEST_UPDATE_RIBBON:
-                    Ribbon ribbon = extras.getParcelable(ReadingActivity.RIBBON_KEY);
-                    int position = extras.getInt(INDEX_KEY);
-                    adapter.set(position, ribbon, false);
-                    break;
-                default:
-                    throw new IllegalStateException("unexpected requestCode " + requestCode);
-            }
+    public void onBackPressed() {
+        if (canGoBack()) {
+            super.onBackPressed();
+        }
+        else {
+            Snackbar.make(
+                    findViewById(R.id.layout_home),
+                    getString(R.string.refuse_back_to_deleted_ribbon),
+                    Snackbar.LENGTH_SHORT);
         }
     }
 
     @Override
-    public void onRequestPermissionsResult(
-            int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case REQUEST_WRITE_STORAGE:
-                if (grantResults.length > 0 && grantResults[0] == PERMISSION_GRANTED) {
-                }
-                else {
-                    Snackbar snackbar = Snackbar.make(
-                            findViewById(R.id.layout_home),
-                            getString(R.string.grant_permission),
-                            Snackbar.LENGTH_LONG);
-                    ((TextView) (snackbar.getView())
-                            .findViewById(android.support.design.R.id.snackbar_text))
-                            .setMaxLines(10);
-                    snackbar.setAction(R.string.grant_permissions, new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            ActivityCompat.requestPermissions(
-                                    RibbonActivity.this,
-                                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                                    REQUEST_WRITE_STORAGE);
-                        }
-                    });
-                    snackbar.show();
-                    justAsked = true;
-                }
-                break;
-        }
+    protected void onPause() {
+        super.onPause();
     }
 
     @Override
@@ -176,11 +160,8 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
             }
         });
 
-        Translation NIV = Translation.get(this, "NIV");
-        if (NIV != null) {
-            Translation.setDefault(NIV);
-        }
-        else {
+        Translation defaultTranslation = Translation.getDefault(this);
+        if (defaultTranslation == null) {
             Snackbar.make(
                     findViewById(R.id.layout_home),
                     String.format(getResources().getString(R.string.unable_to_load_bible), "NIV"),
@@ -225,18 +206,17 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
         dialog.show(fm, NEW_RIBBON_DIALOG_TAG);
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
+    private void selectRibbon(Ribbon ribbon) {
+        Intent intent = new Intent()
+                .putExtra(ReadingActivity.RIBBON_KEY, ribbon);
+        setResult(RESULT_OK, intent);
+        finish();
     }
 
     @Override
     public void onRibbonNameReceived(String name) {
         Ribbon addMe = new Ribbon(Reference.getDefault(), name);
         adapter.add(addMe, true);
-        Intent intent = new Intent(this, ReadingActivity.class)
-                .putExtra(ReadingActivity.RIBBON_KEY, addMe)
-                .putExtra(RibbonActivity.INDEX_KEY, adapter.getItemCount() - 1);
-        startActivityForResult(intent, REQUEST_UPDATE_RIBBON);
+        selectRibbon(addMe);
     }
 }

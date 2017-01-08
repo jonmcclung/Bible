@@ -61,11 +61,16 @@ public class ChapterPagerAdapter extends FragmentStatePagerAdapter {
         return POSITION_NONE;
     }
 
+    /**
+     * will have no effect if setting to the same translation
+     */
     public void setTranslation(Translation translation) {
-        ribbon.setTranslation(translation);
-        for (int i = 0; i < map.size(); ++i) {
-            map.get(map.keyAt(i)).setTranslation(translation);
+        if (ribbon.getTranslation() != translation) {
+            ribbon.setTranslation(translation);
+            for (int i = 0; i < map.size(); ++i) {
+                map.get(map.keyAt(i)).setTranslation(translation);
+            }
+            notifyDataSetChanged();
         }
-        notifyDataSetChanged();
     }
 }

@@ -7,7 +7,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 
 public class TranslationSelectorActivity extends AppCompatActivity
         implements DataListener<Translation> {
@@ -27,8 +26,7 @@ public class TranslationSelectorActivity extends AppCompatActivity
 
         TranslationAdapter adapter = new TranslationAdapter(this);
 
-        adapter.setTranslations(Translation.getAllTranslations(this));
-        Log.d(TAG, Translation.getAllTranslations(this) + "");
+        adapter.setTranslations(Translation.getAll(this));
         recyclerView.setAdapter(adapter);
 
         DividerItemDecoration spacer =

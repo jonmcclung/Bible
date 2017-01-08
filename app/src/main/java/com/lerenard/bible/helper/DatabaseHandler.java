@@ -52,19 +52,20 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     private int itemCount = -1;
 
-    private Context context;
-
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        this.context = context;
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_TABLE_RIBBONS);
-        addRibbon(new Ribbon(
-                new Reference("John", 1, 1, Translation.getDefault(context)),
-                "Personal Reading"));
+
+        Ribbon firstRibbon = new Ribbon(
+                new Reference("John", 0, 1, Translation.getDefault()),
+                "Personal Reading");
+        ContentValues values = getValues(firstRibbon);
+        values.put(RIBBONS_POSITION_IN_LIST, 0);
+        db.insert(TABLE_RIBBONS, null, values);
     }
 
     @Override
@@ -164,7 +165,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public Ribbon getRibbon(Cursor cursor) {
         String translationName =
                 cursor.getString(cursor.getColumnIndex(RIBBONS_REF_TRANSLATION_NAME));
-        Translation translation = Translation.get(context, translationName);
+        Translation translation = Translation.get(translationName);
         return new Ribbon(
                 cursor.getInt(cursor.getColumnIndex(_ID)),
                 new Reference(
@@ -202,7 +203,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 + RIBBONS_LAST_VISITED + ", "
                 + RIBBONS_POSITION_IN_LIST + " FROM "
                 + TABLE_RIBBONS
-                + " ORDER BY " + RIBBONS_LAST_VISITED + " DESC", null);
+                + " ORDER BY " + RIBBONS_LAST_VISITED, null);
         itemCount = res.getCount();
         return res;
     }

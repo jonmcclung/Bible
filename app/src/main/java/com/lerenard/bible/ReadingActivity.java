@@ -6,7 +6,10 @@ import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
@@ -18,7 +21,10 @@ public class ReadingActivity extends AppCompatActivity {
     public static final String RIBBON_KEY = "RIBBON_KEY", CURRENT_POSITION_KEY =
             "CURRENT_POSITION_KEY";
     private static final String TAG = "ReadingActivity_";
-    private static final int SELECT_REFERENCE_CODE = 1, SELECT_TRANSLATION_CODE = 2;
+    private static final int
+            SELECT_REFERENCE_CODE = 1,
+            SELECT_TRANSLATION_CODE = 2,
+            SELECT_RIBBON_CODE = 3;
     private int currentPosition = -1;
     private TextView bookNameView;
     private TextView chapterNameView;
@@ -26,7 +32,6 @@ public class ReadingActivity extends AppCompatActivity {
     private NestedScrollView scrollView;
     private Ribbon ribbon;
     private TextView translationNameView;
-    private int index;
     private ChapterPagerAdapter adapter;
 
     @Override
@@ -38,18 +43,20 @@ public class ReadingActivity extends AppCompatActivity {
                                               .getParcelable(SelectorFragment.REFERENCE_KEY);
                     ribbon.updateIndices(reference);
                     pager.setCurrentItem(ribbon.getPosition());
-                    updateInfoToolbar();
                     break;
                 case SELECT_TRANSLATION_CODE:
                     Translation translation = data.getExtras().getParcelable(
                             TranslationSelectorActivity.TRANSLATION_KEY);
-                    ribbon.setTranslation(translation);
-                    updateInfoToolbar();
                     adapter.setTranslation(translation);
+                    ribbon.setTranslation(translation);
+                    break;
+                case SELECT_RIBBON_CODE:
+                    ribbon = data.getExtras().getParcelable(RIBBON_KEY);
                     break;
                 default:
                     throw new IllegalStateException("unexpected requestCode: " + requestCode);
             }
+            updateInfoToolbar();
         }
     }
 
@@ -61,33 +68,42 @@ public class ReadingActivity extends AppCompatActivity {
         chapterNameView.setText(
                 String.format(Locale.getDefault(), "%d", ribbon.getChapterIndex()));
         translationNameView.setText(ribbon.getTranslation().getName());
+        adapter.setTranslation(ribbon.getTranslation());
     }
 
     @Override
-    public void onBackPressed() {
-        Intent data = new Intent();
-        data.putExtra(RIBBON_KEY, ribbon);
-        if (index != -1) {
-            data.putExtra(RibbonActivity.INDEX_KEY, index);
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_reading_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.activity_reading_menu_go_to_ribbons:
+                goToRibbons();
+                return true;
         }
-        setResult(RESULT_OK, data);
-        finish();
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void goToRibbons() {
+        updateDatabaseWithRibbon();
+        Intent ribbonIntent = new Intent(getApplicationContext(), RibbonActivity.class)
+                .putExtra(RIBBON_KEY, ribbon);
+        startActivityForResult(ribbonIntent, SELECT_RIBBON_CODE);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reading);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.activity_reading_toolbar);
+        setSupportActionBar(toolbar);
 
         Bundle savedState =
                 (savedInstanceState == null ? getIntent().getExtras() : savedInstanceState);
         ribbon = savedState.getParcelable(RIBBON_KEY);
-        if (savedState.containsKey(RibbonActivity.INDEX_KEY)) {
-            index = savedState.getInt(RibbonActivity.INDEX_KEY);
-        }
-        else {
-            index = -1;
-        }
         currentPosition = ribbon.getPosition();
 
         scrollView = (NestedScrollView) findViewById(R.id.scrollView);
@@ -137,11 +153,7 @@ public class ReadingActivity extends AppCompatActivity {
         updateInfoToolbar();
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Log.d(TAG, "stopping");
-
+    private void updateDatabaseWithRibbon() {
         final DatabaseHandler db = MainApplication.getDatabase();
         new AsyncTask<Void, Void, Void>() {
 
@@ -154,10 +166,16 @@ public class ReadingActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "stopping");
+        updateDatabaseWithRibbon();
+    }
+
+    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelable(RIBBON_KEY, ribbon);
-        outState.putInt(RibbonActivity.INDEX_KEY, index);
     }
 
     class StartSelectorFragmentListener implements View.OnClickListener {

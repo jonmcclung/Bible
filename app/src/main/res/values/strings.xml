@@ -22,4 +22,7 @@
     <string name="custom_ribbon_name_hint">Other:</string>
 
     <string name="title_activity_splash">@string/app_name</string>
+    <string name="activity_reading_menu_go_to_ribbons_title">View Ribbons</string>
+    <string
+        name="refuse_back_to_deleted_ribbon">Ribbon has been deleted: cannot go back to it.</string>
 </resources>

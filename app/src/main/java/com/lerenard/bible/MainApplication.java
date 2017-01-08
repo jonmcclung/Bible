@@ -11,6 +11,9 @@ import com.lerenard.bible.helper.DatabaseHandler;
 
 public class MainApplication extends Application {
     private static DatabaseHandler database;
+    private static Context context; // not a memory leak because it will only hold application context.
+
+    public static final String SHARED_PREFERENCES_FILENAME = "preferences";
 
     public static DatabaseHandler getDatabase() {
         return database;
@@ -19,6 +22,11 @@ public class MainApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        database = new DatabaseHandler(getApplicationContext());
+        context = getApplicationContext();
+        database = new DatabaseHandler(context);
+    }
+
+    public static Context getContext() {
+        return context;
     }
 }
