@@ -122,7 +122,9 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
     public void onDrag(Ribbon ribbon, int start, int end) {}
 
     @Override
-    public void onLongPress(Ribbon ribbon, int position) {}
+    public boolean onLongPress(Ribbon ribbon, int position) {
+        return true;
+    }
 
     private void selectRibbon(Ribbon ribbon) {
         Intent intent = new Intent()
@@ -170,7 +172,12 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
         ribbonList.setLayoutManager(layoutManager);
         ribbonList.setAdapter(adapter);
         new ItemTouchHelper(
-                new SimpleItemTouchHelperCallback(adapter))
+                new SimpleItemTouchHelperCallback(adapter) {
+                    @Override
+                    public boolean isLongPressDragEnabled() {
+                        return false;
+                    }
+                })
                 .attachToRecyclerView(ribbonList);
 
         DividerItemDecoration spacer =

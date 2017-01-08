@@ -11,5 +11,5 @@ public interface DataSetListener<T> {
 
     void onDrag(final T t, int start, int end);
 
-    void onLongPress(final T t, int position);
+    boolean onLongPress(final T t, int position);
 }

@@ -10,7 +10,8 @@ import co.paulburke.android.itemtouchhelperdemo.helper.ItemTouchHelperViewHolder
  */
 
 public class RecyclerViewHolder<T> extends RecyclerView.ViewHolder
-        implements View.OnClickListener, ItemTouchHelperViewHolder {
+        implements View.OnClickListener, ItemTouchHelperViewHolder,
+                   View.OnLongClickListener {
     private T item;
     private RecyclerAdapter<T, ? extends RecyclerViewHolder<T>> adapter;
 
@@ -19,6 +20,7 @@ public class RecyclerViewHolder<T> extends RecyclerView.ViewHolder
         super(itemView);
         this.adapter = adapter;
         itemView.setOnClickListener(this);
+        itemView.setOnLongClickListener(this);
     }
 
     @Override
@@ -43,5 +45,10 @@ public class RecyclerViewHolder<T> extends RecyclerView.ViewHolder
     @Override
     public void onItemClear() {
         itemView.setBackgroundColor(adapter.getUnselectedColor());
+    }
+
+    @Override
+    public boolean onLongClick(View view) {
+        return adapter.getListener().onLongPress(item, getAdapterPosition());
     }
 }
