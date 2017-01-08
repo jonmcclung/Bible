@@ -116,7 +116,7 @@ public class Reference implements Parcelable {
     }
 
     public static Reference getDefault() {
-        return new Reference(0, 1, Translation.getDefault());
+        return new Reference("John", 0, 1, Translation.getDefault());
     }
 
     public static int getTotalChapterCount() {

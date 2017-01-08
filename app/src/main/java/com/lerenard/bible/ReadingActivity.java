@@ -90,7 +90,8 @@ public class ReadingActivity extends AppCompatActivity {
 
     private void goToRibbons() {
         updateDatabaseWithRibbon();
-        Intent ribbonIntent = new Intent(getApplicationContext(), RibbonActivity.class);
+        Intent ribbonIntent = new Intent(getApplicationContext(), RibbonActivity.class)
+                .putExtra(RibbonActivity.RIBBON_ID_KEY, ribbon.getId());
         startActivityForResult(ribbonIntent, SELECT_RIBBON_CODE);
     }
 

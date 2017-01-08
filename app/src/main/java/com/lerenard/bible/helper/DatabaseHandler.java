@@ -61,7 +61,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_RIBBONS);
 
         Ribbon firstRibbon = new Ribbon(
-                new Reference("John", 0, 1, Translation.getDefault()),
+                Reference.getDefault(),
                 "Personal Reading");
         ContentValues values = getValues(firstRibbon);
         values.put(RIBBONS_POSITION_IN_LIST, 0);
@@ -71,6 +71,22 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Log.d(TAG, "upgrading from " + oldVersion + " to " + newVersion);
+    }
+
+    /**
+     * Retrieve the values to be inserted for the given ribbon.
+     * Doesn't include the ribbon id as it's assumed that you will
+     * use a where clause with that or that it's otherwise
+     * not useful.
+     */
+    private ContentValues getValues(Ribbon ribbon) {
+        ContentValues values = new ContentValues();
+        values.put(RIBBONS_NAME, ribbon.getName());
+        values.put(RIBBONS_REF_POSITION, ribbon.getReference().getPosition());
+        values.put(RIBBONS_REF_VERSE, ribbon.getReference().getVerse());
+        values.put(RIBBONS_REF_TRANSLATION_NAME, ribbon.getTranslation().getName());
+        values.put(RIBBONS_LAST_VISITED, ribbon.getLastVisited().getTime());
+        return values;
     }
 
     public void addRibbon(Ribbon ribbon) {
@@ -90,23 +106,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = getValues(ribbon);
         values.put(RIBBONS_POSITION_IN_LIST, position);
         ribbon.setId(db.insert(TABLE_RIBBONS, null, values));
-        db.close();
-    }
-
-    /**
-     * Retrieve the values to be inserted for the given ribbon.
-     * Doesn't include the ribbon id as it's assumed that you will
-     * use a where clause with that or that it's otherwise
-     * not useful.
-     */
-    private ContentValues getValues(Ribbon ribbon) {
-        ContentValues values = new ContentValues();
-        values.put(RIBBONS_NAME, ribbon.getName());
-        values.put(RIBBONS_REF_POSITION, ribbon.getReference().getPosition());
-        values.put(RIBBONS_REF_VERSE, ribbon.getReference().getVerse());
-        values.put(RIBBONS_REF_TRANSLATION_NAME, ribbon.getTranslation().getName());
-        values.put(RIBBONS_LAST_VISITED, ribbon.getLastVisited().getTime());
-        return values;
     }
 
     public void moveRibbon(long fromId, int fromPosition, int toPosition) {
@@ -141,7 +140,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         } finally {
             db.endTransaction();
         }
-        db.close();
     }
 
     public Ribbon getRibbon(int id) {
@@ -158,7 +156,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         Ribbon ribbon = getRibbon(cursor);
 
         cursor.close();
-        db.close();
         return ribbon;
     }
 
@@ -188,7 +185,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
 
         cursor.close();
-        db.close();
         return res;
     }
 
@@ -216,8 +212,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 getValues(ribbon),
                 _ID + " = ?",
                 new String[]{Long.toString(ribbon.getId())});
-
-        db.close();
     }
 
     public void batchDeleteRibbon(Collection<Ribbon> ribbons) {
@@ -258,7 +252,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             } while (cursor.moveToNext());
         }
         cursor.close();
-        db.close();
         return stringBuilder.toString();
     }
 
@@ -293,7 +286,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         } finally {
             db.endTransaction();
         }
-        db.close();
     }
 
     public int getCount() {
@@ -314,7 +306,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         cursor.moveToFirst();
         Ribbon res = getRibbon(cursor);
         cursor.close();
-        db.close();
         return res;
     }
 }

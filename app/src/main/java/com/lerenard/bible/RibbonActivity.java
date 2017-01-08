@@ -1,6 +1,5 @@
 package com.lerenard.bible;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -13,6 +12,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.View;
 
 import co.paulburke.android.itemtouchhelperdemo.helper.SimpleItemTouchHelperCallback;
@@ -25,14 +25,11 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
             REQUEST_SELECT_RIBBON_REFERENCE = 3;
     private static final String TAG = "HomeActivity_";
     private static final String NEW_RIBBON_DIALOG_TAG = "NEW_RIBBON_DIALOG_TAG";
+    public static final String RIBBON_ID_KEY = "RIBBON_ID_KEY";
     private static boolean justAsked = false;
-    private static Context context;
     private RibbonAdapter adapter;
-    private int oldRibbonId;
-
-    public static Context getContext() {
-        return context;
-    }
+    private long oldRibbonId;
+    private RecyclerView ribbonList;
 
     @Override
     public void onAdd(final Ribbon ribbon, final int index) {
@@ -47,18 +44,28 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
 
     @Override
     public void onDelete(final Ribbon ribbon, final int position) {
-        if (ribbon.getId() == oldRibbonId) {
+        final boolean undoSetsCanGoBack = ribbon.getId() == oldRibbonId;
+        if (undoSetsCanGoBack) {
             setCanGoBack(false);
         }
         Snackbar.make(
-                findViewById(R.id.layout_home),
+                findViewById(R.id.layout_ribbon),
                 R.string.count_deleted,
                 Snackbar.LENGTH_LONG)
                 .setAction(R.string.undo_count_deleted, new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         adapter.insert(position, ribbon, true);
-                        setCanGoBack(true);
+                        setCanGoBack(undoSetsCanGoBack);
+                        int firstVisiblePosition =
+                                ((LinearLayoutManager) ribbonList.getLayoutManager())
+                                        .findFirstVisibleItemPosition();
+                        int lastVisiblePosition =
+                                ((LinearLayoutManager) ribbonList.getLayoutManager())
+                                        .findLastVisibleItemPosition();
+                        if (firstVisiblePosition > position || lastVisiblePosition < position) {
+                            ribbonList.smoothScrollToPosition(position);
+                        }
                     }
                 }).show();
 
@@ -72,13 +79,14 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
     }
 
     private void setCanGoBack(boolean canGoBack) {
-        int goodRibbonId = Math.abs(oldRibbonId);
+        long goodRibbonId = Math.abs(oldRibbonId);
         if (canGoBack) {
             oldRibbonId = goodRibbonId;
         }
         else {
             oldRibbonId = -goodRibbonId;
         }
+        Log.d(TAG, "set can go back to " + canGoBack + " which is " + canGoBack());
     }
 
     @Override
@@ -127,10 +135,22 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.d(TAG, "saving oldRibbonId: " + oldRibbonId);
+        outState.putLong(RIBBON_ID_KEY, oldRibbonId);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        context = getApplicationContext();
-        setContentView(R.layout.activity_home);
+        setContentView(R.layout.activity_ribbon);
+
+        Bundle savedState =
+                savedInstanceState == null ? getIntent().getExtras() : savedInstanceState;
+
+        oldRibbonId = savedState.getLong(RIBBON_ID_KEY);
+        Log.d(TAG, "restoring oldRibbonId: " + oldRibbonId);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -151,8 +171,7 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
             throw new RuntimeException(e);
         }
 
-        RecyclerView ribbonList = (RecyclerView) findViewById(R.id.ribbonList);
-
+        ribbonList = (RecyclerView) findViewById(R.id.ribbonList);
         LinearLayoutManager layoutManager = new LinearLayoutManager(
                 this,
                 LinearLayoutManager.VERTICAL,
@@ -215,14 +234,15 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
         }
         else {
             Snackbar.make(
-                    findViewById(R.id.layout_home),
+                    findViewById(R.id.layout_ribbon),
                     getString(R.string.refuse_back_to_deleted_ribbon),
-                    Snackbar.LENGTH_SHORT);
+                    Snackbar.LENGTH_SHORT).show();
         }
     }
 
     private boolean canGoBack() {
-        return oldRibbonId < 0;
+        Log.d(TAG, "oldRibbonId is " + oldRibbonId);
+        return oldRibbonId > 0;
     }
 
     @Override
