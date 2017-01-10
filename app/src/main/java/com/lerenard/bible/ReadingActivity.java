@@ -2,8 +2,8 @@ package com.lerenard.bible;
 
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
@@ -75,6 +75,20 @@ public class ReadingActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            findViewById(R.id.activity_reading_root).setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        }
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_reading_menu, menu);
         return true;
@@ -95,6 +109,18 @@ public class ReadingActivity extends AppCompatActivity {
         Intent ribbonIntent = new Intent(getApplicationContext(), RibbonActivity.class)
                 .putExtra(RibbonActivity.RIBBON_ID_KEY, ribbon.getId());
         startActivityForResult(ribbonIntent, SELECT_RIBBON_CODE);
+    }
+
+    private void updateDatabaseWithRibbon() {
+        final DatabaseHandler db = MainApplication.getDatabase();
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                db.updateRibbon(ribbon);
+                return null;
+            }
+        }.execute();
     }
 
     @Override
@@ -158,18 +184,6 @@ public class ReadingActivity extends AppCompatActivity {
         });
 
         updateInfoToolbar();
-    }
-
-    private void updateDatabaseWithRibbon() {
-        final DatabaseHandler db = MainApplication.getDatabase();
-        new AsyncTask<Void, Void, Void>() {
-
-            @Override
-            protected Void doInBackground(Void... params) {
-                db.updateRibbon(ribbon);
-                return null;
-            }
-        }.execute();
     }
 
     @Override
