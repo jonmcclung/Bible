@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -89,18 +88,27 @@ public class SelectorFragment extends Fragment implements ReferenceSelectorItemS
     }
 
     @Override
-    public void onChapterSelected(int chapterIndex) {
-        reference.setChapterIndex(chapterIndex);
+    public void onVerseSelected(int verseIndex) {
+        reference.setVerse(verseIndex);
         if (listener != null) {
-            listener.onChapterSelected(chapterIndex);
+            listener.onVerseSelected(verseIndex);
             listener.submit();
         }
     }
 
     @Override
+    public void onChapterSelected(int chapterIndex) {
+        reference.setChapterIndex(chapterIndex);
+        if (listener != null) {
+            listener.onChapterSelected(chapterIndex);
+        }
+        scrollTo(SelectorPosition.VERSE_POSITION);
+    }
+
+    @Override
     public void onBookSelected(int bookIndex) {
         reference.setBookIndex(bookIndex);
-        adapter.updateChapters(reference);
+        adapter.updateReference(reference);
         if (listener != null) {
             listener.onBookSelected(bookIndex);
         }

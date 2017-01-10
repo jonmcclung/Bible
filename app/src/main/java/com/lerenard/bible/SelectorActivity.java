@@ -17,6 +17,25 @@ public class SelectorActivity extends AppCompatActivity
             SELECTOR_FRAGMENT_TAG = "SELECTOR_FRAGMENT_TAG";
 
     @Override
+    public void onVerseSelected(int verseIndex) {}
+
+    @Override
+    public void onChapterSelected(int chapterIndex) {}
+
+    @Override
+    public void onBookSelected(int bookIndex) {}
+
+    @Override
+    public void submit() {
+        Reference reference = ((SelectorFragment) getSupportFragmentManager()
+                .findFragmentByTag(SELECTOR_FRAGMENT_TAG)).getReference();
+        Intent data = new Intent();
+        data.putExtra(SelectorFragment.REFERENCE_KEY, reference);
+        setResult(RESULT_OK, data);
+        finish();
+    }
+
+    @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reference_selector);
@@ -36,21 +55,5 @@ public class SelectorActivity extends AppCompatActivity
             ((SelectorFragment) getSupportFragmentManager()
                     .findFragmentByTag(SELECTOR_FRAGMENT_TAG)).setListener(this);
         }
-    }
-
-    @Override
-    public void onChapterSelected(int chapterIndex) {}
-
-    @Override
-    public void onBookSelected(int bookIndex) {}
-
-    @Override
-    public void submit() {
-        Reference reference = ((SelectorFragment) getSupportFragmentManager()
-                .findFragmentByTag(SELECTOR_FRAGMENT_TAG)).getReference();
-        Intent data = new Intent();
-        data.putExtra(SelectorFragment.REFERENCE_KEY, reference);
-        setResult(RESULT_OK, data);
-        finish();
     }
 }

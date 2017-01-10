@@ -10,13 +10,13 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 
 /**
- * Created by mc on 25-Dec-16.
+ * Created by mc on 10-Jan-17.
  */
 
-public class ChapterSelectorFragment extends SelectorFragmentTab {
+public class VerseSelectorFragment extends SelectorFragmentTab {
 
-    private static final String TAG = "ChapterSelectorFrag_";
-    private ChapterSelectorAdapter adapter;
+    private static final String TAG = "VerseSelectorFrag_";
+    private VerseSelectorAdapter adapter;
 
     @Nullable
     @Override
@@ -27,10 +27,10 @@ public class ChapterSelectorFragment extends SelectorFragmentTab {
             restoreArguments(savedInstanceState);
         }
         final View rootView =
-                inflater.inflate(R.layout.fragment_chapter_selector, container, false);
+                inflater.inflate(R.layout.fragment_verse_selector, container, false);
 
         final RecyclerView recyclerView =
-                (RecyclerView) rootView.findViewById(R.id.chapter_recycler_view);
+                (RecyclerView) rootView.findViewById(R.id.verse_recycler_view);
 
         final float chapterSelectorDiameter =
                 getActivity().getResources().getDimension(R.dimen.chapter_selector_diameter);
@@ -40,8 +40,10 @@ public class ChapterSelectorFragment extends SelectorFragmentTab {
         final GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 1);
         recyclerView.setLayoutManager(layoutManager);
 
-        adapter = new ChapterSelectorAdapter(Book.getChapterCount(reference.getBookIndex()),
-                                             reference.getChapterIndex(), getContext());
+        adapter = new VerseSelectorAdapter(
+                reference.getChapter().getVerseCount(),
+                reference.getVerse(),
+                getContext());
         adapter.setListener(listener);
         recyclerView.setAdapter(adapter);
         recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(
@@ -61,7 +63,7 @@ public class ChapterSelectorFragment extends SelectorFragmentTab {
                         params.leftMargin = extra / 2;
 
                         layoutManager.scrollToPositionWithOffset(
-                                reference.getChapterIndex() - 1,
+                                reference.getVerse() - 1,
                                 layoutManager.getHeight() / 2);
 
                         recyclerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
@@ -80,6 +82,7 @@ public class ChapterSelectorFragment extends SelectorFragmentTab {
     }
 
     public void updateReference(Reference reference) {
-        adapter.setCount(reference.getBook().getChapterCount(), reference.getChapterIndex());
+        adapter.setCount(reference.getChapter().getVerseCount(), reference.getVerse());
     }
+
 }

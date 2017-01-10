@@ -15,9 +15,10 @@ import static com.lerenard.bible.SelectorFragment.REFERENCE_KEY;
 
 public class SelectorAdapter extends FragmentPagerAdapter {
     private static final String TAG = "SelectorAdapter_";
+    private final Bundle args;
     private BookSelectorFragment bookSelectorFragment;
     private ChapterSelectorFragment chapterSelectorFragment;
-    private final Bundle args;
+    private VerseSelectorFragment verseSelectorFragment;
     private ReferenceSelectorItemSelectedListener listener;
 
 
@@ -37,6 +38,9 @@ public class SelectorAdapter extends FragmentPagerAdapter {
             case CHAPTER_POSITION:
                 fragment = new ChapterSelectorFragment();
                 break;
+            case VERSE_POSITION:
+                fragment = new VerseSelectorFragment();
+                break;
             default:
                 throw new IllegalStateException("unexpected position: " + position);
         }
@@ -46,7 +50,8 @@ public class SelectorAdapter extends FragmentPagerAdapter {
 
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
-        SelectorFragmentTab fragment = (SelectorFragmentTab) super.instantiateItem(container, position);
+        SelectorFragmentTab fragment =
+                (SelectorFragmentTab) super.instantiateItem(container, position);
         switch (SelectorPosition.values()[position]) {
             case BOOK_POSITION:
                 bookSelectorFragment = (BookSelectorFragment) fragment;
@@ -54,6 +59,9 @@ public class SelectorAdapter extends FragmentPagerAdapter {
             case CHAPTER_POSITION:
                 chapterSelectorFragment =
                         (ChapterSelectorFragment) fragment;
+                break;
+            case VERSE_POSITION:
+                verseSelectorFragment = (VerseSelectorFragment) fragment;
                 break;
             default:
                 throw new IllegalStateException("unexpected position: " + position);
@@ -75,6 +83,8 @@ public class SelectorAdapter extends FragmentPagerAdapter {
                 return "Book";
             case CHAPTER_POSITION:
                 return "Chapter";
+            case VERSE_POSITION:
+                return "Verse";
             default:
                 throw new IllegalStateException("unexpected position: " + position);
         }
@@ -88,9 +98,17 @@ public class SelectorAdapter extends FragmentPagerAdapter {
         if (chapterSelectorFragment != null) {
             chapterSelectorFragment.setListener(listener);
         }
+        if (verseSelectorFragment != null) {
+            verseSelectorFragment.setListener(listener);
+        }
     }
 
-    public void updateChapters(Reference reference) {
-        chapterSelectorFragment.updateReference(reference);
+    public void updateReference(Reference reference) {
+        if (chapterSelectorFragment != null) {
+            chapterSelectorFragment.updateReference(reference);
+        }
+        if (verseSelectorFragment != null) {
+            verseSelectorFragment.updateReference(reference);
+        }
     }
 }

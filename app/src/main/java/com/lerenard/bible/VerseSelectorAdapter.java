@@ -1,8 +1,12 @@
 package com.lerenard.bible;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -10,15 +14,13 @@ import android.widget.TextView;
 import java.util.Locale;
 
 /**
- * Created by mc on 26-Dec-16.
+ * Created by mc on 10-Jan-17.
  */
+public class VerseSelectorAdapter extends NumberSelectorAdapter<VerseSelectorAdapter.ViewHolder> {
 
-public class ChapterSelectorAdapter
-        extends NumberSelectorAdapter<ChapterSelectorAdapter.ViewHolder> {
+    private static final String TAG = "VerseSelectorAdapter_";
 
-    private static final String TAG = "ChapterSelectorAdapter_";
-
-    public ChapterSelectorAdapter(int count, int initialPosition, Context context) {
+    public VerseSelectorAdapter(int count, int initialPosition, Context context) {
         super(count, initialPosition, context);
     }
 
@@ -29,15 +31,15 @@ public class ChapterSelectorAdapter
 
     class ViewHolder extends ReferenceSelectorAdapter.ViewHolder {
 
-        ViewHolder(View itemView) {
-            super(itemView);
-        }
-
         @Override
         void onSelected() {
             if (listener != null) {
-                listener.onChapterSelected(position);
+                listener.onVerseSelected(position);
             }
+        }
+
+        ViewHolder(View itemView) {
+            super(itemView);
         }
 
         public void setPosition(int position) {
@@ -46,3 +48,4 @@ public class ChapterSelectorAdapter
         }
     }
 }
+

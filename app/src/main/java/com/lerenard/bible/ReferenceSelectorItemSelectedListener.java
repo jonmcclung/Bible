@@ -5,6 +5,8 @@ package com.lerenard.bible;
  */
 
 public interface ReferenceSelectorItemSelectedListener {
+    void onVerseSelected(int verseIndex);
+
     void onChapterSelected(int chapterIndex);
 
     void onBookSelected(int bookIndex);
