@@ -3,6 +3,7 @@ package com.lerenard.bible;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
@@ -12,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.lerenard.bible.helper.DatabaseHandler;
 
@@ -105,6 +107,10 @@ public class ReadingActivity extends AppCompatActivity {
         Bundle savedState =
                 (savedInstanceState == null ? getIntent().getExtras() : savedInstanceState);
         ribbon = savedState.getParcelable(RIBBON_KEY);
+
+        if (savedInstanceState == null) {
+            Toast.makeText(getApplicationContext(), ribbon.getName(), Toast.LENGTH_LONG).show();
+        }
         currentPosition = ribbon.getPosition();
 
         scrollView = (NestedScrollView) findViewById(R.id.scrollView);
