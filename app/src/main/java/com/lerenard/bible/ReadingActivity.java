@@ -88,8 +88,6 @@ public class ReadingActivity extends AppCompatActivity {
 
     private void scrollToPreferred(int position) {
         final ChapterFragment oldFragment = adapter.getItem(position);
-        Log.d(TAG, "asked to scroll, fragment is " +
-                   oldFragment + " and listener has been set.");
         oldFragment.setOnCreatedListener(new OnFragmentCreatedListener<ChapterFragment>() {
             @Override
             public void onFragmentCreated(final ChapterFragment fragment) {
@@ -100,16 +98,11 @@ public class ReadingActivity extends AppCompatActivity {
                             @Override
                             public void onGlobalLayout() {
                                 if (fragment == adapter.getItem(currentPosition)) {
-                                    /*Log.d(
-                                            TAG, "I really hope that " + fragment + " == " +
-                                                 oldFragment);
-                                    Log.d(TAG, "scrolling to " + fragment.getPreferredOffset());*/
                                     scrollView.smoothScrollTo(0, fragment.getPreferredOffset());
                                 }
                                 text.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                             }
                         });
-                Log.d(TAG, "observer added");
             }
         });
     }

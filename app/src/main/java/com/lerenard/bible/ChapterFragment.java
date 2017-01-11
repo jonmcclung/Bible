@@ -51,7 +51,6 @@ public class ChapterFragment extends Fragment {
     public View onCreateView(
             LayoutInflater inflater, @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState) {
-//        setRetainInstance(true);
         if (savedInstanceState != null) {
             ribbon = savedInstanceState.getParcelable(ReadingActivity.RIBBON_KEY);
             verseOffsets = savedInstanceState.getIntegerArrayList(VERSE_OFFSETS_KEY);
@@ -74,17 +73,12 @@ public class ChapterFragment extends Fragment {
             initializeText();
         }
         if (listener != null) {
-            Log.d(TAG, this + "notifying inside onCreateView");
             listener.onFragmentCreated(this);
-        }
-        else {
-            Log.d(TAG, this + "no listener yet, will notify when I get one.");
         }
         created = true;
         int padding = (int) getResources().getDimension(R.dimen.activity_reading_padding);
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        Log.d(TAG, "setting height to " + displayMetrics.heightPixels);
         root.setPadding(padding, padding, padding, displayMetrics.heightPixels);
         return root;
     }
@@ -94,7 +88,6 @@ public class ChapterFragment extends Fragment {
     }
 
     private SpannableStringBuilder getChapterText(Chapter chapter) {
-        Log.d(TAG, "getChapterText");
         verseOffsets.clear();
         ArrayList<Verse> verses = chapter.getVerses();
         SpannableStringBuilder builder = new SpannableStringBuilder();
@@ -136,19 +129,7 @@ public class ChapterFragment extends Fragment {
     public void setOnCreatedListener(OnFragmentCreatedListener<ChapterFragment> listener) {
         this.listener = listener;
         if (created) {
-            Log.d(
-                    TAG, this +
-                         "didn't have a chance to notify when I was created, but better late than" +
-                         " never.");
             listener.onFragmentCreated(this);
-        }
-        else {
-            if (text != null && text.getLayout() != null) {
-                Log.d(TAG, "wtf");
-            }
-            Log.d(
-                    TAG,
-                    this + "I haven't been created yet, so I'll wait until that happens to notify");
         }
     }
 
