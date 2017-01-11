@@ -99,9 +99,13 @@ public class ReadingActivity extends AppCompatActivity {
                         new ViewTreeObserver.OnGlobalLayoutListener() {
                             @Override
                             public void onGlobalLayout() {
-                                Log.d(TAG, "I really hope that " + fragment + " == " + oldFragment);
-                                Log.d(TAG, "scrolling to " + fragment.getPreferredOffset());
-                                scrollView.smoothScrollTo(0, fragment.getPreferredOffset());
+                                if (fragment == adapter.getItem(currentPosition)) {
+                                    /*Log.d(
+                                            TAG, "I really hope that " + fragment + " == " +
+                                                 oldFragment);
+                                    Log.d(TAG, "scrolling to " + fragment.getPreferredOffset());*/
+                                    scrollView.smoothScrollTo(0, fragment.getPreferredOffset());
+                                }
                                 text.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                             }
                         });

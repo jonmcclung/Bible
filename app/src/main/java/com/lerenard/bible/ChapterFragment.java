@@ -152,6 +152,10 @@ public class ChapterFragment extends Fragment {
         }
     }
 
+    public void removeListener() {
+        listener = null;
+    }
+
     public int setAndGetVerseIndex(int y) {
         if (text == null || text.getLayout() == null) {
             return -1;
