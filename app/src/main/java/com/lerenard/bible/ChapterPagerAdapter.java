@@ -28,9 +28,17 @@ public class ChapterPagerAdapter extends FragmentStatePagerAdapter {
     }
 
     @Override
+    public Object instantiateItem(ViewGroup container, int position) {
+        ChapterFragment fragment = (ChapterFragment) super.instantiateItem(container, position);
+        map.put(position, fragment);
+        return fragment;
+    }
+
+    @Override
     public ChapterFragment getItem(int position) {
         ChapterFragment res = map.get(position);
         if (res != null) {
+            Log.d(TAG, "recycling " + position + ", " + res);
             return res;
         }
         else {
@@ -41,6 +49,7 @@ public class ChapterPagerAdapter extends FragmentStatePagerAdapter {
                 newReference.setVerseIndex(1);
             }
             res = new ChapterFragment();
+            Log.d(TAG, "need a new " + position + ", " + res);
             map.put(position, res);
             Bundle args = new Bundle();
             Ribbon toPass = new Ribbon(ribbon);
@@ -54,6 +63,7 @@ public class ChapterPagerAdapter extends FragmentStatePagerAdapter {
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
         super.destroyItem(container, position, object);
+        Log.d(TAG, "destroying " + position);
         map.remove(position);
     }
 

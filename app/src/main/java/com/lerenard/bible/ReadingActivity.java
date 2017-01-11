@@ -45,25 +45,25 @@ public class ReadingActivity extends AppCompatActivity {
                 case SELECT_REFERENCE_CODE:
                     Reference reference = data.getExtras()
                                               .getParcelable(SelectorFragment.REFERENCE_KEY);
-                    adapter.getItem(ribbon.getPosition()).getRibbon()
-                           .setVerseIndex(reference.getVerseIndex());
                     ribbon.setReference(reference);
-                    pager.setCurrentItem(ribbon.getPosition());
                     break;
                 case SELECT_TRANSLATION_CODE:
                     Translation translation = data.getExtras().getParcelable(
                             TranslationSelectorActivity.TRANSLATION_KEY);
-                    adapter.setTranslation(translation);
                     ribbon.setTranslation(translation);
                     break;
                 case SELECT_RIBBON_CODE:
                     ribbon = data.getExtras().getParcelable(RIBBON_KEY);
-                    pager.setCurrentItem(ribbon.getPosition());
                     break;
                 default:
                     throw new IllegalStateException("unexpected requestCode: " + requestCode);
             }
+            pager.setCurrentItem(ribbon.getPosition());
+            ChapterFragment fragment = adapter.getItem(ribbon.getPosition());
+            fragment.getRibbon().setVerseIndex(ribbon.getVerseIndex());
+            Log.d(TAG, "set fragment verseIndex to " + fragment.getRibbon().getVerseIndex() + " which should be " + ribbon.getVerseIndex());
             updateInfoToolbar();
+            Log.d(TAG, "calling scrollToPreferred from onActivityResult. Ribbon: " + ribbon);
             scrollToPreferred();
         }
     }
@@ -87,10 +87,10 @@ public class ReadingActivity extends AppCompatActivity {
     }
 
     private void scrollToPreferred(int position) {
-        ChapterFragment fragment = adapter.getItem(position);
-        Log.d(TAG, "asked to scroll, reference is " + ribbon.getReference() + ", fragment is " +
-                   fragment + " and listener has been set.");
-        fragment.setOnCreatedListener(new OnFragmentCreatedListener<ChapterFragment>() {
+        final ChapterFragment oldFragment = adapter.getItem(position);
+        Log.d(TAG, "asked to scroll, fragment is " +
+                   oldFragment + " and listener has been set.");
+        oldFragment.setOnCreatedListener(new OnFragmentCreatedListener<ChapterFragment>() {
             @Override
             public void onFragmentCreated(final ChapterFragment fragment) {
                 final TextView text = fragment.getText();
@@ -99,6 +99,7 @@ public class ReadingActivity extends AppCompatActivity {
                         new ViewTreeObserver.OnGlobalLayoutListener() {
                             @Override
                             public void onGlobalLayout() {
+                                Log.d(TAG, "I really hope that " + fragment + " == " + oldFragment);
                                 Log.d(TAG, "scrolling to " + fragment.getPreferredOffset());
                                 scrollView.smoothScrollTo(0, fragment.getPreferredOffset());
                                 text.getViewTreeObserver().removeOnGlobalLayoutListener(this);
@@ -188,6 +189,21 @@ public class ReadingActivity extends AppCompatActivity {
         currentPosition = ribbon.getPosition();
 
         scrollView = (NestedScrollView) findViewById(R.id.scrollView);
+        scrollView.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(
+                    NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                ChapterFragment fragment = adapter.getItem(currentPosition);
+                int verseIndex = fragment.setAndGetVerseIndex(scrollY);
+                if (verseIndex != -1) {
+                    /* not using updateInfoToolbar for speed purposes
+                    since this method will be called a lot.*/
+                    verseNameView.setText(
+                            String.format(Locale.getDefault(), "%d", verseIndex));
+                    ribbon.setVerseIndex(verseIndex);
+                }
+            }
+        });
 
         bookNameView = (TextView) findViewById(R.id.book_name_view);
         bookNameView.setOnClickListener(
@@ -236,6 +252,7 @@ public class ReadingActivity extends AppCompatActivity {
         });
 
         updateInfoToolbar();
+        Log.d(TAG, "calling scrollToPreferred from onCreate. Ribbon: " + ribbon);
         scrollToPreferred();
     }
 
