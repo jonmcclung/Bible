@@ -26,4 +26,5 @@
     <string
         name="refuse_back_to_deleted_ribbon">Ribbon has been deleted: cannot go back to it.</string>
     <string name="edit_ribbon_name_dialog_title">Edit Name</string>
+    <string name="activity_reading_new_ribbon_here_title">New Ribbon Here</string>
 </resources>

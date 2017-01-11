@@ -39,7 +39,7 @@ public class RibbonActivity extends AppCompatActivity implements DataSetListener
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                MainApplication.getDatabase().addRibbon(ribbon, index);
+                MainApplication.getDatabase().addRibbon(ribbon);
                 return null;
             }
         }.execute();

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
@@ -20,7 +21,7 @@ import com.lerenard.bible.helper.DatabaseHandler;
 
 import java.util.Locale;
 
-public class ReadingActivity extends AppCompatActivity {
+public class ReadingActivity extends AppCompatActivity implements RibbonNameListener {
     public static final String RIBBON_KEY = "RIBBON_KEY", CURRENT_POSITION_KEY =
             "CURRENT_POSITION_KEY";
     private static final String TAG = "ReadingActivity_";
@@ -28,6 +29,7 @@ public class ReadingActivity extends AppCompatActivity {
             SELECT_REFERENCE_CODE = 1,
             SELECT_TRANSLATION_CODE = 2,
             SELECT_RIBBON_CODE = 3;
+    private static final String NEW_RIBBON_DIALOG_TAG = "NEW_RIBBON_DIALOG_TAG";
     private int currentPosition = -1;
     private TextView bookNameView;
     private TextView chapterNameView;
@@ -54,6 +56,7 @@ public class ReadingActivity extends AppCompatActivity {
                     break;
                 case SELECT_RIBBON_CODE:
                     ribbon = data.getExtras().getParcelable(RIBBON_KEY);
+                    makeRibbonToast();
                     break;
                 default:
                     throw new IllegalStateException("unexpected requestCode: " + requestCode);
@@ -61,11 +64,20 @@ public class ReadingActivity extends AppCompatActivity {
             pager.setCurrentItem(ribbon.getPosition());
             ChapterFragment fragment = adapter.getItem(ribbon.getPosition());
             fragment.getRibbon().setVerseIndex(ribbon.getVerseIndex());
-            Log.d(TAG, "set fragment verseIndex to " + fragment.getRibbon().getVerseIndex() + " which should be " + ribbon.getVerseIndex());
             updateInfoToolbar();
-            Log.d(TAG, "calling scrollToPreferred from onActivityResult. Ribbon: " + ribbon);
             scrollToPreferred();
         }
+        else {
+            makeRibbonToast();
+        }
+    }
+
+    private void makeRibbonToast() {
+        makeRibbonToast(ribbon.getName());
+    }
+
+    private void makeRibbonToast(String text) {
+        Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG).show();
     }
 
     private void updateInfoToolbar() {
@@ -139,6 +151,9 @@ public class ReadingActivity extends AppCompatActivity {
             case R.id.activity_reading_menu_go_to_ribbons:
                 goToRibbons();
                 return true;
+            case R.id.activity_reading_new_ribbon_here:
+                newRibbonHere();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -148,6 +163,13 @@ public class ReadingActivity extends AppCompatActivity {
         Intent ribbonIntent = new Intent(getApplicationContext(), RibbonActivity.class)
                 .putExtra(RibbonActivity.RIBBON_ID_KEY, ribbon.getId());
         startActivityForResult(ribbonIntent, SELECT_RIBBON_CODE);
+    }
+
+    private void newRibbonHere() {
+        FragmentManager fm = getSupportFragmentManager();
+        NewRibbonDialog dialog = new NewRibbonDialog();
+        dialog.setListener(this);
+        dialog.show(fm, NEW_RIBBON_DIALOG_TAG);
     }
 
     private void updateDatabaseWithRibbon() {
@@ -181,7 +203,7 @@ public class ReadingActivity extends AppCompatActivity {
         ribbon = savedState.getParcelable(RIBBON_KEY);
 
         if (savedInstanceState == null) {
-            Toast.makeText(getApplicationContext(), ribbon.getName(), Toast.LENGTH_LONG).show();
+            makeRibbonToast();
         }
         currentPosition = ribbon.getPosition();
 
@@ -263,6 +285,21 @@ public class ReadingActivity extends AppCompatActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelable(RIBBON_KEY, ribbon);
+    }
+
+    @Override
+    public void onRibbonNameReceived(String name) {
+        final Ribbon oldRibbon = new Ribbon(ribbon);
+        ribbon.setName(name);
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                MainApplication.getDatabase().updateRibbon(oldRibbon);
+                MainApplication.getDatabase().addRibbon(ribbon);
+                return null;
+            }
+        }.execute();
+        makeRibbonToast();
     }
 
     class StartSelectorFragmentListener implements View.OnClickListener {

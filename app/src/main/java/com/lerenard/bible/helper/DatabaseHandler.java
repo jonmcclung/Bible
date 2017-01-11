@@ -108,7 +108,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return values;
     }
 
-    public void addRibbon(Ribbon ribbon, int position) {
+    public void addRibbon(Ribbon ribbon) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = getValues(ribbon);
         ribbon.setId(db.insert(TABLE_RIBBONS, null, values));

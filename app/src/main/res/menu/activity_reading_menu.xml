@@ -7,4 +7,9 @@
         android:title="@string/activity_reading_menu_go_to_ribbons_title"
         android:visible="true"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/activity_reading_new_ribbon_here"
+        android:title="@string/activity_reading_new_ribbon_here_title"
+        android:visible="true"
+        app:showAsAction="never"/>
 </menu>
