@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.TextAppearanceSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +21,35 @@ import java.util.Locale;
 
 public class ChapterFragment extends Fragment {
     private static final String TAG = "ChapterFragment_";
+    private static final String VERSE_OFFSETS_KEY = "VERSE_OFFSETS_KEY";
+    private static final String TEXT_KEY = "TEXT_KEY";
+    private static final String CREATED_KEY = "CREATED_KEY";
     private Ribbon ribbon;
+    private ArrayList<Integer> verseOffsets;
+    private OnFragmentCreatedListener<ChapterFragment> listener;
+    private boolean created;
+    private TextView text;
+    private CharSequence chapterText;
+
+    public void setOnCreatedListener(OnFragmentCreatedListener<ChapterFragment> listener) {
+        this.listener = listener;
+        if (created) {
+            Log.d(
+                    TAG, this +
+                         "didn't have a chance to notify when I was created, but better late than" +
+                         " never.");
+            listener.onFragmentCreated(this);
+        }
+        else {
+            Log.d(
+                    TAG,
+                    this + "I haven't been created yet, so I'll wait until that happens to notify");
+        }
+    }
+
+    public TextView getText() {
+        return text;
+    }
 
     public Ribbon getRibbon() {
         return ribbon;
@@ -39,27 +68,53 @@ public class ChapterFragment extends Fragment {
     public View onCreateView(
             LayoutInflater inflater, @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState) {
+        setRetainInstance(true);
         if (savedInstanceState != null) {
             ribbon = savedInstanceState.getParcelable(ReadingActivity.RIBBON_KEY);
+            verseOffsets = savedInstanceState.getIntegerArrayList(VERSE_OFFSETS_KEY);
+            chapterText = savedInstanceState.getCharSequence(TEXT_KEY);
+            created = savedInstanceState.getBoolean(CREATED_KEY);
         }
+        else {
+            verseOffsets = new ArrayList<>();
+            chapterText = null;
+            created = false;
+        }
+
         View root = inflater.inflate(R.layout.fragment_reading, container, false);
         root.setTag(ribbon.getReference().getPosition());
-        TextView text = ((TextView) root.findViewById(R.id.chapterText));
-        text.setText(getChapterText(ribbon.getChapter()));
-
+        text = ((TextView) root.findViewById(R.id.chapterText));
+        if (chapterText != null) {
+            text.setText(chapterText);
+        }
+        else {
+            initializeText();
+        }
+        if (listener != null) {
+            Log.d(TAG, this + "notifying inside onCreateView");
+            listener.onFragmentCreated(this);
+        }
+        else {
+            Log.d(TAG, this + "no listener yet, will notify when I get one.");
+        }
+        created = true;
         return root;
     }
 
-    public void setTranslation(Translation translation) {
-        ribbon.setTranslation(translation);
+    private void initializeText() {
+        text.setText(getChapterText(ribbon.getChapter()));
     }
 
     private SpannableStringBuilder getChapterText(Chapter chapter) {
+        Log.d(TAG, "getChapterText");
+        verseOffsets.clear();
         ArrayList<Verse> verses = chapter.getVerses();
         SpannableStringBuilder builder = new SpannableStringBuilder();
-        for (int i = 0; i < verses.size(); ++i) {
-            Verse verse = verses.get(i);
-            addSubscript(builder, i + 1);
+        int verseIndex = 0;
+        while (verseIndex < verses.size()) {
+            verseOffsets.add(builder.length());
+            Verse verse = verses.get(verseIndex);
+            addSubscript(builder, ++verseIndex);
             builder.append(getString(R.string.spacing_between_number_and_verse));
             builder.append(verse.getText());
             builder.append(getString(R.string.spacing_between_verse_and_number));
@@ -85,5 +140,17 @@ public class ChapterFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelable(ReadingActivity.RIBBON_KEY, ribbon);
+        outState.putIntegerArrayList(VERSE_OFFSETS_KEY, verseOffsets);
+        outState.putCharSequence(TEXT_KEY, text.getText());
+        outState.putBoolean(CREATED_KEY, created);
+    }
+
+    public int getPreferredOffset() {
+        return text.getLayout().getLineTop(text.getLayout().getLineForOffset(
+                verseOffsets.get(ribbon.getVerseIndex() - 1)));
+    }
+
+    public void setTranslation(Translation translation) {
+        ribbon.setTranslation(translation);
     }
 }

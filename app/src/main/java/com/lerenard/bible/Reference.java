@@ -56,21 +56,14 @@ public class Reference implements Parcelable {
     private Translation translation;
     private int position;
     private int bookIndex;
-    private int chapterIndex, verse;
+    private int chapterIndex, verseIndex;
 
     protected Reference(Parcel in) {
         bookIndex = in.readInt();
         chapterIndex = in.readInt();
-        verse = in.readInt();
+        verseIndex = in.readInt();
         translation = in.readParcelable(Translation.class.getClassLoader());
         updatePosition();
-    }
-
-    public Reference(int position, int verse, Translation translation) {
-        this.position = position;
-        updateIndices();
-        this.verse = verse;
-        this.translation = translation;
     }
 
     /**
@@ -86,20 +79,45 @@ public class Reference implements Parcelable {
     }
 
     public Reference(Reference reference) {
-        this(reference.position, reference.verse, reference.translation);
+        this(reference.position, reference.verseIndex, reference.translation);
     }
 
-    public Reference(int bookIndex, int chapterIndex, int verse, Translation translation) {
+    public Reference(int position, int verseIndex, Translation translation) {
+        this.position = position;
+        updateIndices();
+        this.verseIndex = verseIndex;
+        this.translation = translation;
+    }
+
+    /**
+     * updates indices from position. Does *not* update verse, so you may end up with an invalid
+     * reference
+     * if you forget to do so
+     */
+    private void updateIndices() {
+        bookIndex = Arrays.binarySearch(cumulativeChapterCount, position);
+        if (bookIndex >=
+            0) {  // it is the first chapterIndex of the next book, so increment bookIndex
+            ++bookIndex;
+        }
+        else {  // the exact chapterIndex count was not found
+            /* converting to insertion point: the first bookIndex that held a value greater than
+            calculatePosition, also the bookIndex of the book it belongs in*/
+            bookIndex = -(bookIndex + 1);
+            if (bookIndex == cumulativeChapterCount.length) {
+                throw new IllegalStateException(
+                        "bookIndex must not be equal to the last bookIndex. Index: " + bookIndex +
+                        ", max: " + cumulativeChapterCount.length);  // invalid position
+            }
+        }
+        chapterIndex = position + 1 - (bookIndex == 0 ? 0 : cumulativeChapterCount[bookIndex - 1]);
+    }
+
+    public Reference(int bookIndex, int chapterIndex, int verseIndex, Translation translation) {
         this.bookIndex = bookIndex;
         this.chapterIndex = chapterIndex;
-        this.verse = verse;
+        this.verseIndex = verseIndex;
         this.translation = translation;
-        updatePosition();
-    }
-
-    public Reference(String bookName, int chapterIndex, int verse, Translation translation) {
-        this(chapterIndex, verse, translation);
-        bookIndex = Book.indexFromName(bookName);
         updatePosition();
     }
 /*
@@ -109,6 +127,12 @@ public class Reference implements Parcelable {
 
     public static Reference fromPosition(int position, Translation translation) {
     }*/
+
+    public Reference(String bookName, int chapterIndex, int verseIndex, Translation translation) {
+        this(chapterIndex, verseIndex, translation);
+        bookIndex = Book.indexFromName(bookName);
+        updatePosition();
+    }
 
     public static Reference parseString(String reference) {
         return null;
@@ -131,18 +155,18 @@ public class Reference implements Parcelable {
         this.translation = translation;
     }
 
-    public String getBookName() {
-        return allBooks.get(bookIndex);
-    }
-
     public int getChapterIndex() {
         return chapterIndex;
     }
 
     public void setChapterIndex(int chapter) {
         this.chapterIndex = chapter;
-        setVerse(Math.min(verse, getChapter().getVerseCount()));
+        setVerseIndex(Math.min(verseIndex, getChapter().getVerseCount()));
         updatePosition();
+    }
+
+    public Verse getVerse() {
+        return getChapter().getVerse(verseIndex);
     }
 
     public Chapter getChapter() {
@@ -153,17 +177,21 @@ public class Reference implements Parcelable {
         setChapterIndex(chapter.getIndex());
     }
 
-    public int getVerse() {
-        return verse;
+    public Book getBook() {
+        return translation.getBook(bookIndex);
     }
 
-    public void setVerse(int verse) {
-        if (verse < 1 || verse > getChapter().getVerseCount()) {
+    public int getVerseIndex() {
+        return verseIndex;
+    }
+
+    public void setVerseIndex(int verseIndex) {
+        if (verseIndex < 1 || verseIndex > getChapter().getVerseCount()) {
             throw new IllegalArgumentException(
-                    "verse must be between 1 and the number of verses in the chapter. Book: " +
-                    getBookName() + ", Chapter: " + chapterIndex + ":" + verse);
+                    "verseIndex must be between 1 and the number of verses in the chapter. Book: " +
+                    getBookName() + ", Chapter: " + chapterIndex + ":" + verseIndex);
         }
-        this.verse = verse;
+        this.verseIndex = verseIndex;
     }
 
     public int getBookIndex() {
@@ -182,11 +210,12 @@ public class Reference implements Parcelable {
     }
 
     public String getUIString() {
-        return getBookName() + " " + String.valueOf(chapterIndex) + ":" + String.valueOf(verse);
+        return getBookName() + " " + String.valueOf(chapterIndex) + ":" +
+               String.valueOf(verseIndex);
     }
 
-    public Book getBook() {
-        return translation.getBook(bookIndex);
+    public String getBookName() {
+        return allBooks.get(bookIndex);
     }
 
     @Override
@@ -198,7 +227,7 @@ public class Reference implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeInt(bookIndex);
         parcel.writeInt(chapterIndex);
-        parcel.writeInt(verse);
+        parcel.writeInt(verseIndex);
         parcel.writeParcelable(translation, 0);
     }
 
@@ -209,33 +238,12 @@ public class Reference implements Parcelable {
     public void setPosition(int position) {
         this.position = position;
         updateIndices();
+        verseIndex = Math.min(verseIndex, getChapter().getVerseCount());
     }
 
     public void setIndices(int bookIndex, int chapterIndex) {
         setBookIndex(bookIndex);
         this.chapterIndex = chapterIndex;
         updatePosition();
-    }
-
-    /**
-     * updates indices from position
-     */
-    private void updateIndices() {
-        bookIndex = Arrays.binarySearch(cumulativeChapterCount, position);
-        if (bookIndex >=
-            0) {  // it is the first chapterIndex of the next book, so increment bookIndex
-            ++bookIndex;
-        }
-        else {  // the exact chapterIndex count was not found
-            /* converting to insertion point: the first bookIndex that held a value greater than
-            calculatePosition, also the bookIndex of the book it belongs in*/
-            bookIndex = -(bookIndex + 1);
-            if (bookIndex == cumulativeChapterCount.length) {
-                throw new IllegalStateException(
-                        "bookIndex must not be equal to the last bookIndex. Index: " + bookIndex +
-                        ", max: " + cumulativeChapterCount.length);  // invalid position
-            }
-        }
-        chapterIndex = position + 1 - (bookIndex == 0 ? 0 : cumulativeChapterCount[bookIndex - 1]);
     }
 }

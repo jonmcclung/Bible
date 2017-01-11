@@ -52,7 +52,6 @@ public class SelectorFragment extends Fragment implements ReferenceSelectorItemS
             restoreArguments(savedInstanceState);
         }
 
-
         View rootView = inflater.inflate(R.layout.fragment_reference_selector, container, false);
 
         TextView goButton = (TextView) rootView.findViewById(R.id.go_button);
@@ -89,7 +88,7 @@ public class SelectorFragment extends Fragment implements ReferenceSelectorItemS
 
     @Override
     public void onVerseSelected(int verseIndex) {
-        reference.setVerse(verseIndex);
+        reference.setVerseIndex(verseIndex);
         if (listener != null) {
             listener.onVerseSelected(verseIndex);
             listener.submit();
@@ -99,6 +98,7 @@ public class SelectorFragment extends Fragment implements ReferenceSelectorItemS
     @Override
     public void onChapterSelected(int chapterIndex) {
         reference.setChapterIndex(chapterIndex);
+        adapter.updateReference(reference);
         if (listener != null) {
             listener.onChapterSelected(chapterIndex);
         }

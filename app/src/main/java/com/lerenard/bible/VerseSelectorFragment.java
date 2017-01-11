@@ -42,7 +42,7 @@ public class VerseSelectorFragment extends SelectorFragmentTab {
 
         adapter = new VerseSelectorAdapter(
                 reference.getChapter().getVerseCount(),
-                reference.getVerse(),
+                reference.getVerseIndex(),
                 getContext());
         adapter.setListener(listener);
         recyclerView.setAdapter(adapter);
@@ -63,7 +63,7 @@ public class VerseSelectorFragment extends SelectorFragmentTab {
                         params.leftMargin = extra / 2;
 
                         layoutManager.scrollToPositionWithOffset(
-                                reference.getVerse() - 1,
+                                reference.getVerseIndex() - 1,
                                 layoutManager.getHeight() / 2);
 
                         recyclerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
@@ -82,7 +82,7 @@ public class VerseSelectorFragment extends SelectorFragmentTab {
     }
 
     public void updateReference(Reference reference) {
-        adapter.setCount(reference.getChapter().getVerseCount(), reference.getVerse());
+        adapter.setCount(reference.getChapter().getVerseCount(), reference.getVerseIndex());
     }
 
 }

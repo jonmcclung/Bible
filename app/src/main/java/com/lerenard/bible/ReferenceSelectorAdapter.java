@@ -63,6 +63,7 @@ public abstract class ReferenceSelectorAdapter<T extends ReferenceSelectorAdapte
         int oldCount = this.count;
         int oldSelection = this.currentSelection;
 
+
         this.count = count;
         this.currentSelection = currentSelection;
 
@@ -71,6 +72,7 @@ public abstract class ReferenceSelectorAdapter<T extends ReferenceSelectorAdapte
         }
         else {
             notifyItemRangeRemoved(count, oldCount - count);
+            notifyItemChanged(count - 1); // should make the last item colored
         }
     }
 

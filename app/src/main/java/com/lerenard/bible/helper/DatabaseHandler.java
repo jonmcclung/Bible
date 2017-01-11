@@ -102,7 +102,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(RIBBONS_NAME, ribbon.getName());
         values.put(RIBBONS_REF_POSITION, ribbon.getReference().getPosition());
-        values.put(RIBBONS_REF_VERSE, ribbon.getReference().getVerse());
+        values.put(RIBBONS_REF_VERSE, ribbon.getReference().getVerseIndex());
         values.put(RIBBONS_REF_TRANSLATION_NAME, ribbon.getTranslation().getName());
         values.put(RIBBONS_LAST_VISITED, ribbon.getLastVisited().getTime());
         return values;

@@ -24,13 +24,16 @@
             app:layout_scrollFlags="scroll|enterAlways|snap"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
-            <LinearLayout
+            <com.google.android.flexbox.FlexboxLayout
                 android:id="@+id/activity_reading_toolbar_reference_info"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/colorPrimary"
                 android:orientation="horizontal"
-                android:padding="8dp">
+                android:padding="8dp"
+                app:flexWrap="wrap"
+                app:showDivider="middle"
+                app:dividerDrawable="@drawable/info_bar_divider">
 
                 <TextView
                     android:id="@+id/book_name_view"
@@ -38,20 +41,22 @@
 
                 <TextView
                     android:id="@+id/chapter_name_view"
-                    style="@style/activity_reading_reference_info_view_style"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginStart="8dp"/>
+                    style="@style/activity_reading_reference_info_view_style"/>
+
+                <TextView
+                    android:id="@+id/verse_name_view"
+                    style="@style/activity_reading_reference_info_view_style"/>
 
                 <View
                     android:layout_width="0dp"
                     android:layout_height="0dp"
-                    android:layout_weight="1"/>
+                    app:layout_flexGrow="1"/>
 
                 <TextView
                     android:id="@+id/translation_name_view"
                     style="@style/activity_reading_reference_info_view_style"/>
 
-            </LinearLayout>
+            </com.google.android.flexbox.FlexboxLayout>
         </android.support.v7.widget.Toolbar>
     </android.support.design.widget.AppBarLayout>
 

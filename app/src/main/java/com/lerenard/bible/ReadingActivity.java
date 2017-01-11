@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,6 +36,7 @@ public class ReadingActivity extends AppCompatActivity {
     private Ribbon ribbon;
     private TextView translationNameView;
     private ChapterPagerAdapter adapter;
+    private TextView verseNameView;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -43,7 +45,9 @@ public class ReadingActivity extends AppCompatActivity {
                 case SELECT_REFERENCE_CODE:
                     Reference reference = data.getExtras()
                                               .getParcelable(SelectorFragment.REFERENCE_KEY);
-                    ribbon.updateIndices(reference);
+                    adapter.getItem(ribbon.getPosition()).getRibbon()
+                           .setVerseIndex(reference.getVerseIndex());
+                    ribbon.setReference(reference);
                     pager.setCurrentItem(ribbon.getPosition());
                     break;
                 case SELECT_TRANSLATION_CODE:
@@ -60,25 +64,62 @@ public class ReadingActivity extends AppCompatActivity {
                     throw new IllegalStateException("unexpected requestCode: " + requestCode);
             }
             updateInfoToolbar();
+            scrollToPreferred();
         }
     }
 
     private void updateInfoToolbar() {
         currentPosition = pager.getCurrentItem();
         ribbon.setPosition(currentPosition);
+        ribbon.setVerseIndex(adapter.getItem(currentPosition).getRibbon().getVerseIndex());
 
         bookNameView.setText(ribbon.getBookName());
         chapterNameView.setText(
                 String.format(Locale.getDefault(), "%d", ribbon.getChapterIndex()));
+        verseNameView.setText(
+                String.format(Locale.getDefault(), "%d", ribbon.getVerseIndex()));
         translationNameView.setText(ribbon.getTranslation().getName());
         adapter.setTranslation(ribbon.getTranslation());
+    }
+
+    private void scrollToPreferred() {
+        scrollToPreferred(currentPosition);
+    }
+
+    private void scrollToPreferred(int position) {
+        ChapterFragment fragment = adapter.getItem(position);
+        Log.d(TAG, "asked to scroll, reference is " + ribbon.getReference() + ", fragment is " +
+                   fragment + " and listener has been set.");
+        fragment.setOnCreatedListener(new OnFragmentCreatedListener<ChapterFragment>() {
+            @Override
+            public void onFragmentCreated(final ChapterFragment fragment) {
+                final TextView text = fragment.getText();
+                final ViewTreeObserver observer = text.getViewTreeObserver();
+                observer.addOnGlobalLayoutListener(
+                        new ViewTreeObserver.OnGlobalLayoutListener() {
+                            @Override
+                            public void onGlobalLayout() {
+                                Log.d(TAG, "scrolling to " + fragment.getPreferredOffset());
+                                scrollView.smoothScrollTo(0, fragment.getPreferredOffset());
+                                text.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                            }
+                        });
+                Log.d(TAG, "observer added");
+            }
+        });
     }
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            findViewById(R.id.activity_reading_root).setSystemUiVisibility(
+            goImmersive();
+        }
+    }
+
+    private void goImmersive() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            getWindow().getDecorView().setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                     | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
@@ -127,6 +168,13 @@ public class ReadingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reading);
+        getWindow().getDecorView().setOnSystemUiVisibilityChangeListener(
+                new View.OnSystemUiVisibilityChangeListener() {
+                    @Override
+                    public void onSystemUiVisibilityChange(int visibility) {
+                        goImmersive();
+                    }
+                });
         Toolbar toolbar = (Toolbar) findViewById(R.id.activity_reading_toolbar);
         setSupportActionBar(toolbar);
 
@@ -148,6 +196,10 @@ public class ReadingActivity extends AppCompatActivity {
         chapterNameView = (TextView) findViewById(R.id.chapter_name_view);
         chapterNameView.setOnClickListener(
                 new StartSelectorFragmentListener(SelectorPosition.CHAPTER_POSITION));
+
+        verseNameView = (TextView) findViewById(R.id.verse_name_view);
+        verseNameView.setOnClickListener(
+                new StartSelectorFragmentListener(SelectorPosition.VERSE_POSITION));
 
         translationNameView = (TextView) findViewById(R.id.translation_name_view);
         translationNameView.setText(ribbon.getTranslation().getName());
@@ -174,7 +226,7 @@ public class ReadingActivity extends AppCompatActivity {
             @Override
             public void onPageSelected(int position) {
                 if (currentPosition != pager.getCurrentItem()) {
-                    scrollView.smoothScrollTo(0, 0);
+                    scrollToPreferred(position);
                     updateInfoToolbar();
                 }
             }
@@ -184,12 +236,12 @@ public class ReadingActivity extends AppCompatActivity {
         });
 
         updateInfoToolbar();
+        scrollToPreferred();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        Log.d(TAG, "stopping");
         updateDatabaseWithRibbon();
     }
 

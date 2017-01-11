@@ -7,7 +7,7 @@
     <dimen name="ribbonSubViewTextSize">18sp</dimen>
     <dimen name="ribbonNameOptionTextSize">22sp</dimen>
     <dimen name="verseTextSize">20sp</dimen>
-    <dimen name="verseNumberSize">12sp</dimen>
+    <dimen name="verseNumberSize">16sp</dimen>
     <dimen name="chapterNumberSize">64sp</dimen>
     <dimen name="activity_reading_padding">16dp</dimen>
     <dimen name="activity_reading_end_padding">128dp</dimen>
@@ -27,4 +27,5 @@
     <dimen name="dialog_title_text_size">28sp</dimen>
     <dimen name="ribbon_view_reference_view_marginLeft">8dp</dimen>
     <dimen name="activity_reading_reference_info_view_padding_side">8dp</dimen>
+    <dimen name="info_view_min_margin">8dp</dimen>
 </resources>

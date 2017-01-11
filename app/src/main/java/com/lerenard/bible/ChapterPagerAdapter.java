@@ -28,21 +28,27 @@ public class ChapterPagerAdapter extends FragmentStatePagerAdapter {
     }
 
     @Override
-    public Fragment getItem(int position) {
-        Reference newReference = new Reference(ribbon.getReference());
-        newReference.setPosition(position);
-        /*Log.d(
-                TAG, "position: " + position + ", newReference: " + newReference + ", ribbon: " +
-                     ribbon);*/
-        ChapterFragment res = new ChapterFragment();
-        map.put(position, res);
-        Bundle args = new Bundle();
-        Ribbon toPass = new Ribbon(ribbon);
-        toPass.setReference(newReference);
-//        Log.d(TAG, "modified ribbon is " + toPass);
-        args.putParcelable(ReadingActivity.RIBBON_KEY, toPass);
-        res.setArguments(args);
-        return res;
+    public ChapterFragment getItem(int position) {
+        ChapterFragment res = map.get(position);
+        if (res != null) {
+            return res;
+        }
+        else {
+            Reference newReference = new Reference(ribbon.getReference());
+            if (position != ribbon.getPosition()) {
+                newReference.setPosition(position);
+                // we want to see the top of new chapters when we scroll to them
+                newReference.setVerseIndex(1);
+            }
+            res = new ChapterFragment();
+            map.put(position, res);
+            Bundle args = new Bundle();
+            Ribbon toPass = new Ribbon(ribbon);
+            toPass.setReference(newReference);
+            args.putParcelable(ReadingActivity.RIBBON_KEY, toPass);
+            res.setArguments(args);
+            return res;
+        }
     }
 
     @Override

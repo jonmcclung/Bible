@@ -4,7 +4,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.text.format.DateFormat;
-import android.util.Log;
 
 import java.sql.Date;
 
@@ -44,10 +43,6 @@ public class Ribbon implements Parcelable {
         setLastVisited(lastVisited);
     }
 
-    public Ribbon(Reference reference, String name) {
-        this(-1, reference, name, new Date(System.currentTimeMillis()));
-    }
-
     public Date getLastVisited() {
         return lastVisited;
     }
@@ -60,6 +55,10 @@ public class Ribbon implements Parcelable {
         else {
             lastVisitedText = DateFormat.format(dateFormatString, lastVisited);
         }
+    }
+
+    public Ribbon(Reference reference, String name) {
+        this(-1, reference, name, new Date(System.currentTimeMillis()));
     }
 
     protected Ribbon(Parcel in) {
@@ -156,11 +155,19 @@ public class Ribbon implements Parcelable {
         reference.setPosition(position);
     }
 
-    public void updateIndices(Reference reference) {
-        this.reference.setIndices(reference.getBookIndex(), reference.getChapterIndex());
-    }
-
     public void setLastVisitedToNow() {
         setLastVisited(new Date(System.currentTimeMillis()));
+    }
+
+    public int getVerseIndex() {
+        return reference.getVerseIndex();
+    }
+
+    public Verse getVerse() {
+        return reference.getVerse();
+    }
+
+    public void setVerseIndex(int verseIndex) {
+        reference.setVerseIndex(verseIndex);
     }
 }
