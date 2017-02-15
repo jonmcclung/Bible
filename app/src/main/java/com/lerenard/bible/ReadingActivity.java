@@ -47,7 +47,9 @@ public class ReadingActivity extends AppCompatActivity implements RibbonNameList
                 case SELECT_REFERENCE_CODE:
                     Reference reference = data.getExtras()
                                               .getParcelable(SelectorFragment.REFERENCE_KEY);
+                    Log.d(TAG, "reference is " + reference);
                     ribbon.setReference(reference);
+                    Log.d(TAG, "ribbon is " + ribbon);
                     break;
                 case SELECT_TRANSLATION_CODE:
                     Translation translation = data.getExtras().getParcelable(
@@ -61,9 +63,9 @@ public class ReadingActivity extends AppCompatActivity implements RibbonNameList
                 default:
                     throw new IllegalStateException("unexpected requestCode: " + requestCode);
             }
-            pager.setCurrentItem(ribbon.getPosition());
             ChapterFragment fragment = adapter.getItem(ribbon.getPosition());
             fragment.getRibbon().setVerseIndex(ribbon.getVerseIndex());
+            pager.setCurrentItem(ribbon.getPosition());
             updateInfoToolbar();
             scrollToPreferred();
         }
