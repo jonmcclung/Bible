@@ -179,5 +179,6 @@ public class ChapterFragment extends Fragment {
 
     public void setTranslation(Translation translation) {
         ribbon.setTranslation(translation);
+        initializeText();
     }
 }

@@ -54,7 +54,7 @@ public class ReadingActivity extends AppCompatActivity implements RibbonNameList
                 case SELECT_TRANSLATION_CODE:
                     Translation translation = data.getExtras().getParcelable(
                             TranslationSelectorActivity.TRANSLATION_KEY);
-                    ribbon.setTranslation(translation);
+                    adapter.setTranslation(translation);
                     break;
                 case SELECT_RIBBON_CODE:
                     ribbon = data.getExtras().getParcelable(RIBBON_KEY);
