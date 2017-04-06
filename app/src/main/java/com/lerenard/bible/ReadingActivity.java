@@ -48,10 +48,8 @@ public class ReadingActivity extends AppCompatActivity implements RibbonNameList
                 case SELECT_REFERENCE_CODE:
                     Reference reference = data.getExtras()
                                               .getParcelable(SelectorFragment.REFERENCE_KEY);
-//                    Log.d(TAG, "reference is " + reference);
                     ribbon.setReference(reference);
                     verseIndex = reference.getVerseIndex();
-//                    Log.d(TAG, "ribbon is " + ribbon);
                     break;
                 case SELECT_TRANSLATION_CODE:
                     Translation translation = data.getExtras().getParcelable(
@@ -71,16 +69,6 @@ public class ReadingActivity extends AppCompatActivity implements RibbonNameList
             adapter.getItem(ribbon.getPosition())
                    .getRibbon()
                    .setVerseIndex(verseIndex);
-            /*Log.d(TAG, "set verseIndex to " + ribbon.getVerseIndex());
-            Log.d(TAG, "verseIndex before updateInfoToolbar is " +
-                       adapter.getItem(ribbon.getPosition()).getRibbon().getVerseIndex());
-            if (fragment != adapter.getItem(ribbon.getPosition())) {
-                Log.d(TAG, "They are different!");
-            }
-            if (fragment.getRibbon().getVerseIndex() != adapter.getItem(ribbon.getPosition())
-            .getRibbon().getVerseIndex()) {
-                Log.d(TAG, "They have different verses!");
-            }*/
             updateInfoToolbar();
             scrollToPreferred();
         }
@@ -246,6 +234,13 @@ public class ReadingActivity extends AppCompatActivity implements RibbonNameList
                 if (verseIndex != -1) {
                     /* not using updateInfoToolbar for speed purposes
                     since this method will be called a lot.*/
+                    int maxVerseIndex = ribbon.getChapter().getVerseCount();
+                    if (verseIndex > maxVerseIndex) {
+                        if (oldScrollY < scrollY) {
+                            scrollView.scrollTo(oldScrollX, oldScrollY);
+                        }
+                        verseIndex = maxVerseIndex;
+                    }
                     verseNameView.setText(
                             String.format(Locale.getDefault(), "%d", verseIndex));
                     ribbon.setVerseIndex(verseIndex);

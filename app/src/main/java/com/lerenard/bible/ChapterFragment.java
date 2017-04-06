@@ -16,6 +16,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Locale;
+import java.util.logging.Logger;
 
 /**
  * Created by mc on 23-Dec-16.
@@ -144,19 +145,25 @@ public class ChapterFragment extends Fragment {
             return -1;
         }
         int line = text.getLayout().getLineForVertical(y);
+        if (line == text.getLayout().getLineCount() - 1) {
+            return verseOffsets.size() + 1;
+        }
         int offset = text.getLayout().getLineStart(line);
         int verseIndex = Collections.binarySearch(verseOffsets, offset);
+        Log.d(TAG, "y: " + y + ", line: " + line + ", offset: " + offset + ", verseIndex: " + verseIndex);
         if (verseIndex < 0) {
             verseIndex = -verseIndex;
         }
         else {
             ++verseIndex;
         }
-        if (verseIndex > verseOffsets.size()) {
-            verseIndex = verseOffsets.size();
-        }
         // verseIndex represents the smallest i such that verseOffsets[i] >= offset
-        ribbon.setVerseIndex(verseIndex);
+        if (verseIndex > verseOffsets.size()) {
+            --verseIndex;
+        }
+        else {
+            ribbon.setVerseIndex(verseIndex);
+        }
         return verseIndex;
     }
 
