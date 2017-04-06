@@ -73,6 +73,7 @@ public class ChapterFragment extends Fragment {
             initializeText();
         }
         if (listener != null) {
+            Log.d(TAG, "never created before, but notifying");
             listener.onFragmentCreated(this);
         }
         created = true;
@@ -129,6 +130,7 @@ public class ChapterFragment extends Fragment {
     public void setOnCreatedListener(OnFragmentCreatedListener<ChapterFragment> listener) {
         this.listener = listener;
         if (created) {
+            Log.d(TAG, "already created, so notifying");
             listener.onFragmentCreated(this);
         }
     }

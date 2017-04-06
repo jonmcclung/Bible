@@ -42,14 +42,16 @@ public class ReadingActivity extends AppCompatActivity implements RibbonNameList
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        int verseIndex = ribbon.getVerseIndex();
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case SELECT_REFERENCE_CODE:
                     Reference reference = data.getExtras()
                                               .getParcelable(SelectorFragment.REFERENCE_KEY);
-                    Log.d(TAG, "reference is " + reference);
+//                    Log.d(TAG, "reference is " + reference);
                     ribbon.setReference(reference);
-                    Log.d(TAG, "ribbon is " + ribbon);
+                    verseIndex = reference.getVerseIndex();
+//                    Log.d(TAG, "ribbon is " + ribbon);
                     break;
                 case SELECT_TRANSLATION_CODE:
                     Translation translation = data.getExtras().getParcelable(
@@ -58,14 +60,27 @@ public class ReadingActivity extends AppCompatActivity implements RibbonNameList
                     break;
                 case SELECT_RIBBON_CODE:
                     ribbon = data.getExtras().getParcelable(RIBBON_KEY);
+                    verseIndex = ribbon.getVerseIndex();
                     makeRibbonToast();
                     break;
                 default:
                     throw new IllegalStateException("unexpected requestCode: " + requestCode);
             }
-            ChapterFragment fragment = adapter.getItem(ribbon.getPosition());
-            fragment.getRibbon().setVerseIndex(ribbon.getVerseIndex());
+
             pager.setCurrentItem(ribbon.getPosition());
+            adapter.getItem(ribbon.getPosition())
+                   .getRibbon()
+                   .setVerseIndex(verseIndex);
+            /*Log.d(TAG, "set verseIndex to " + ribbon.getVerseIndex());
+            Log.d(TAG, "verseIndex before updateInfoToolbar is " +
+                       adapter.getItem(ribbon.getPosition()).getRibbon().getVerseIndex());
+            if (fragment != adapter.getItem(ribbon.getPosition())) {
+                Log.d(TAG, "They are different!");
+            }
+            if (fragment.getRibbon().getVerseIndex() != adapter.getItem(ribbon.getPosition())
+            .getRibbon().getVerseIndex()) {
+                Log.d(TAG, "They have different verses!");
+            }*/
             updateInfoToolbar();
             scrollToPreferred();
         }
@@ -78,11 +93,8 @@ public class ReadingActivity extends AppCompatActivity implements RibbonNameList
         makeRibbonToast(ribbon.getName());
     }
 
-    private void makeRibbonToast(String text) {
-        Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG).show();
-    }
-
     private void updateInfoToolbar() {
+        Log.d(TAG, "updateInfoToolbar");
         currentPosition = pager.getCurrentItem();
         ribbon.setPosition(currentPosition);
         ribbon.setVerseIndex(adapter.getItem(currentPosition).getRibbon().getVerseIndex());
@@ -94,10 +106,16 @@ public class ReadingActivity extends AppCompatActivity implements RibbonNameList
                 String.format(Locale.getDefault(), "%d", ribbon.getVerseIndex()));
         translationNameView.setText(ribbon.getTranslation().getName());
         adapter.setTranslation(ribbon.getTranslation());
+        Log.d(TAG, "verseIndex inside updateInfoToolbar is " +
+                   adapter.getItem(currentPosition).getRibbon().getVerseIndex());
     }
 
     private void scrollToPreferred() {
         scrollToPreferred(currentPosition);
+    }
+
+    private void makeRibbonToast(String text) {
+        Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG).show();
     }
 
     private void scrollToPreferred(int position) {
@@ -112,7 +130,15 @@ public class ReadingActivity extends AppCompatActivity implements RibbonNameList
                             @Override
                             public void onGlobalLayout() {
                                 if (fragment == adapter.getItem(currentPosition)) {
+                                    Log.d(TAG, "scrolling to " + fragment.getPreferredOffset() +
+                                               " because verseIndex is " +
+                                               fragment.getRibbon().getVerseIndex());
                                     scrollView.smoothScrollTo(0, fragment.getPreferredOffset());
+                                }
+                                else {
+                                    Log.d(TAG, "fragment: " + fragment +
+                                               " is different from current item: " +
+                                               adapter.getItem(currentPosition));
                                 }
                                 text.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                             }
@@ -189,6 +215,7 @@ public class ReadingActivity extends AppCompatActivity implements RibbonNameList
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate");
         setContentView(R.layout.activity_reading);
         getWindow().getDecorView().setOnSystemUiVisibilityChangeListener(
                 new View.OnSystemUiVisibilityChangeListener() {
@@ -263,6 +290,7 @@ public class ReadingActivity extends AppCompatActivity implements RibbonNameList
             @Override
             public void onPageSelected(int position) {
                 if (currentPosition != pager.getCurrentItem()) {
+                    Log.d(TAG, "onPageSelected");
                     scrollToPreferred(position);
                     updateInfoToolbar();
                 }
