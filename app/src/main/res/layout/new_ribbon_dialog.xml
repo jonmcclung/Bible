@@ -31,7 +31,7 @@
             android:layout_height="wrap_content"
             android:hint="@string/custom_ribbon_name_hint"
             android:imeOptions="actionGo"
-            android:inputType="textAutoCorrect"
+            android:inputType="textAutoCorrect|textCapWords"
             android:maxLines="1"
             android:textColor="@color/dialog_text_color"
             android:textSize="@dimen/new_ribbon_dialog_text_size"/>

@@ -68,6 +68,7 @@ public class Translation implements Parcelable {
     public List<Book> getBooks() {
         while (books == null) {
             try {
+//                Log.d(TAG, "waiting on books...");
                 Thread.sleep(50);
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -262,6 +263,7 @@ public class Translation implements Parcelable {
         @Override
         protected Void doInBackground(Void... voids) {
             books = Translation.loadBooks(name);
+            Log.d(TAG, "finished loading translation " + name);
             return null;
         }
     }
